@@ -55,6 +55,12 @@ def consolidate_station_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
 
+def nantes_consolidate_station_data():
+
+    # Consolidation logic for Nantes Bicycle data
+    with open(f"data/raw_data/{today_date}/nantes_realtime_bicycle_data.json") as fd:
+        data = json.load(fd)
+    print(data)
 
 def consolidate_city_data():
 
