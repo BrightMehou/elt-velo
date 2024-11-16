@@ -57,6 +57,8 @@ def consolidate_station_data():
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
 
 def nantes_consolidate_station_data():
+
+    con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     data = {}
     # Consolidation logic for Nantes Bicycle data
     with open(f"data/raw_data/{today_date}/nantes_realtime_bicycle_data.json") as fd:
@@ -64,7 +66,7 @@ def nantes_consolidate_station_data():
     
     nantes_raw_data_df = pd.json_normalize(data)
     nantes_raw_data_df["id"] = nantes_raw_data_df["number"].apply(lambda x: f"{NANTES_CITY_CODE}-{x}")
-    nantes_raw_data_df["city_code"] = None
+    nantes_raw_data_df["city_code"] = None 
     nantes_raw_data_df["created_date"] = date.today()
 
     nantes_station_data_df = nantes_raw_data_df[[
@@ -90,7 +92,8 @@ def nantes_consolidate_station_data():
 
     }, inplace=True)
 
-    print(nantes_station_data_df.dtypes)
+    con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM nantes_station_data_df;")
+
 def consolidate_city_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)

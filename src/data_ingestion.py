@@ -19,6 +19,14 @@ def get_nante_realtime_bicycle_data():
     
     serialize_data(response.text, "nantes_realtime_bicycle_data.json")
 
+def get_commune_data():
+    
+    url = "https://geo.api.gouv.fr/communes"
+    
+    response = requests.request("GET", url)
+
+    serialize_data(response.text, "commune_data.json")
+
 def serialize_data(raw_json: str, file_name: str):
 
     today_date = datetime.now().strftime("%Y-%m-%d")
