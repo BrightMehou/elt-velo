@@ -55,9 +55,7 @@ def consolidate_station_data():
     }, inplace=True)
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
-
-def nantes_consolidate_station_data():
-
+    
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     data = {}
     # Consolidation logic for Nantes Bicycle data

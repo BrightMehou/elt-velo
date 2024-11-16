@@ -9,7 +9,6 @@ from data_consolidation import (
     consolidate_city_data,
     consolidate_station_data,
     consolidate_station_statement_data,
-    nantes_consolidate_station_data
 )
 
 from data_ingestion import (
@@ -35,8 +34,6 @@ def main():
     consolidate_station_data()
     consolidate_station_statement_data()
 
-    #add of Nantes
-    nantes_consolidate_station_data()
     print("Consolidation data ended.")
 
     # data agregation
