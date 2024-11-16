@@ -55,7 +55,7 @@ def consolidate_station_data():
     }, inplace=True)
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
-    
+
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     data = {}
     # Consolidation logic for Nantes Bicycle data
@@ -96,21 +96,33 @@ def consolidate_city_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     data = {}
+    with open(f"data/raw_data/{today_date}/commune_data.json") as fd:
+        data = json.load(fd)
 
+    commune_df = pd.json_normalize(data)
+    commune_df = commune_df[["code","population"]]
+    data = {}
+
+    
     with open(f"data/raw_data/{today_date}/paris_realtime_bicycle_data.json") as fd:
         data = json.load(fd)
 
     raw_data_df = pd.json_normalize(data)
-    raw_data_df["nb_inhabitants"] = None
-
+    #raw_data_df["nb_inhabitants"] = None
+    raw_data_df = raw_data_df.merge(commune_df, how = 'left', left_on="code_insee_commune", right_on="code")
     city_data_df = raw_data_df[[
         "code_insee_commune",
         "nom_arrondissement_communes",
-        "nb_inhabitants"
+        #"nb_inhabitants",
+        "population"
     ]]
+
+    
+
     city_data_df.rename(columns={
         "code_insee_commune": "id",
-        "nom_arrondissement_communes": "name"
+        "nom_arrondissement_communes": "name",
+        "population" : "nb_inhabitants"
     }, inplace=True)
     city_data_df.drop_duplicates(inplace = True)
 

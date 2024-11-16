@@ -11,6 +11,6 @@ requete = "SELECT ds.name, ds.code, ds.address, tmp.avg_dock_available FROM DIM_
 con.sql(requete).show()
 
 print("RUN")
-requete = "SELECT * FROM CONSOLIDATE_STATION"
+requete = "SELECT * FROM CONSOLIDATE_CITY"
 con.sql(requete).show()
 con.close()
