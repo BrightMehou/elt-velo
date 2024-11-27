@@ -10,7 +10,7 @@ print("-- Nb de vélos disponibles en moyenne dans chaque station")
 requete = "SELECT ds.name, ds.code, ds.address, tmp.avg_dock_available FROM DIM_STATION ds JOIN ( SELECT station_id, AVG(BICYCLE_AVAILABLE) AS avg_dock_available FROM FACT_STATION_STATEMENT GROUP BY station_id ) AS tmp ON ds.id = tmp.station_id;"
 con.sql(requete).show()
 
-print("RUN")
-requete = "SELECT * FROM CONSOLIDATE_CITY"
-con.sql(requete).show()
-con.close()
+# print("RUN")
+# requete = "SELECT * FROM CONSOLIDATE_CITY"
+# con.sql(requete).show()
+# con.close()

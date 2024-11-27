@@ -16,8 +16,13 @@ def create_consolidate_tables():
             print(statement)
             con.execute(statement)
 
-def consolidate_station_data():
+def load_json_file(name):
+    data = {}
+    with open(f"data/raw_data/{today_date}/{name}") as fd:
+        data = json.load(fd)
+    return 
 
+def paris_consolidate_station_data():
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     data = {}
     
@@ -55,6 +60,8 @@ def consolidate_station_data():
     }, inplace=True)
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
+
+def nantes_consolidate_station_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
@@ -102,6 +109,12 @@ def consolidate_station_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM nantes_station_data_df;")
 
+def consolidate_station_data():
+
+    paris_consolidate_station_data()
+
+    nantes_consolidate_station_data()
+
 def consolidate_city_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
@@ -123,8 +136,7 @@ def consolidate_city_data():
     
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_CITY SELECT * FROM commune_df;")
 
-
-def consolidate_station_statement_data():
+def paris_consolidate_station_statement_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     data = {}
@@ -152,6 +164,7 @@ def consolidate_station_statement_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT SELECT * FROM paris_station_statement_data_df;")
 
+def nantes_consolidate_station_statement_data():
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     data = {}
 
@@ -178,3 +191,9 @@ def consolidate_station_statement_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT SELECT * FROM nantes_station_statement_data_df;")
 
+
+def consolidate_station_statement_data():
+
+    paris_consolidate_station_statement_data()
+    
+    nantes_consolidate_station_statement_data()
