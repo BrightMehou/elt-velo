@@ -62,10 +62,11 @@ def nantes_consolidate_station_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
-    data = load_json_file("commune_data.json")
-    commune_df = pd.json_normalize(data)
-    code_nantes = commune_df.query("nom == 'Nantes'")
-    code_nantes = code_nantes["code"].to_list()[0]
+    requete = """SELECT ID FROM CONSOLIDATE_CITY 
+             WHERE NAME='Nantes'
+             AND CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_CITY)"""
+    con.sql(requete).show()
+    code_nantes = con.sql(requete).fetchall()[0][0]
 
     data = load_json_file("nantes_realtime_bicycle_data.json")
     nantes_raw_data_df = pd.json_normalize(data)
@@ -102,10 +103,11 @@ def toulouse_consolidate_station_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
-    data = load_json_file("commune_data.json")
-    commune_df = pd.json_normalize(data)
-    code_toulouse = commune_df.query("nom == 'Toulouse'")
-    code_toulouse = code_toulouse["code"].to_list()[0]
+    requete = """SELECT ID FROM CONSOLIDATE_CITY 
+             WHERE NAME='Toulouse'
+             AND CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_CITY)"""
+    con.sql(requete).show()
+    code_toulouse = con.sql(requete).fetchall()[0][0]
 
     data = load_json_file("toulouse_realtime_bicycle_data.json")
     toulouse_raw_data_df = pd.json_normalize(data)
