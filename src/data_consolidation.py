@@ -20,16 +20,12 @@ def load_json_file(name):
     data = {}
     with open(f"data/raw_data/{today_date}/{name}") as fd:
         data = json.load(fd)
-    return 
+    return data
 
 def paris_consolidate_station_data():
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
-    data = {}
-    
-    # Consolidation logic for Paris Bicycle data
-    with open(f"data/raw_data/{today_date}/paris_realtime_bicycle_data.json") as fd:
-        data = json.load(fd)
-    
+
+    data = load_json_file("paris_realtime_bicycle_data.json")
     paris_raw_data_df = pd.json_normalize(data)
     paris_raw_data_df["id"] = paris_raw_data_df["stationcode"].apply(lambda x: f"{PARIS_CITY_CODE}-{x}")
     paris_raw_data_df["address"] = None
@@ -65,20 +61,12 @@ def nantes_consolidate_station_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
-    data = {}
-
-    "faire du SQL pour aller plus vite avec consolidate_city_data"
-    with open(f"data/raw_data/{today_date}/commune_data.json") as fd:
-        data = json.load(fd)
+    data = load_json_file("commune_data.json")
     commune_df = pd.json_normalize(data)
     code_nantes = commune_df.query("nom == 'Nantes'")
     code_nantes = code_nantes["code"].to_list()[0]
-    print("Print",code_nantes)
-    data = {}
-    # Consolidation logic for Nantes Bicycle data
-    with open(f"data/raw_data/{today_date}/nantes_realtime_bicycle_data.json") as fd:
-        data = json.load(fd)
-    
+
+    data = load_json_file("nantes_realtime_bicycle_data.json")
     nantes_raw_data_df = pd.json_normalize(data)
     nantes_raw_data_df["id"] = nantes_raw_data_df["number"].apply(lambda x: f"{NANTES_CITY_CODE}-{x}")
     nantes_raw_data_df["city_code"] = code_nantes
@@ -118,10 +106,8 @@ def consolidate_station_data():
 def consolidate_city_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
-    data = {}
-    with open(f"data/raw_data/{today_date}/commune_data.json") as fd:
-        data = json.load(fd)
 
+    data = load_json_file("commune_data.json")
     raw_data_df = pd.json_normalize(data)
     commune_df = raw_data_df[["code","nom","population"]]
 
@@ -139,12 +125,8 @@ def consolidate_city_data():
 def paris_consolidate_station_statement_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
-    data = {}
 
-    # Consolidate station statement data for Paris
-    with open(f"data/raw_data/{today_date}/paris_realtime_bicycle_data.json") as fd:
-        data = json.load(fd)
-
+    data = load_json_file("paris_realtime_bicycle_data.json")
     paris_raw_data_df = pd.json_normalize(data)
     paris_raw_data_df["station_id"] = paris_raw_data_df["stationcode"].apply(lambda x: f"{PARIS_CITY_CODE}-{x}")
     paris_raw_data_df["created_date"] = date.today()
@@ -166,12 +148,8 @@ def paris_consolidate_station_statement_data():
 
 def nantes_consolidate_station_statement_data():
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
-    data = {}
 
-    # Consolidate station statement data for Nantes
-    with open(f"data/raw_data/{today_date}/nantes_realtime_bicycle_data.json") as fd:
-        data = json.load(fd)
-
+    data = load_json_file("nantes_realtime_bicycle_data.json")
     nantes_raw_data_df = pd.json_normalize(data)
     nantes_raw_data_df["station_id"] = nantes_raw_data_df["number"].apply(lambda x: f"{NANTES_CITY_CODE}-{x}")
     nantes_raw_data_df["created_date"] = date.today()
