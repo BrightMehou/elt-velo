@@ -14,6 +14,7 @@ from data_consolidation import (
 from data_ingestion import (
     get_paris_realtime_bicycle_data,
     get_nante_realtime_bicycle_data,
+    get_toulouse_realtime_bicycle_data,
     get_commune_data
 )
 
@@ -24,6 +25,7 @@ def main():
     print("Data ingestion started.")
     get_paris_realtime_bicycle_data()
     get_nante_realtime_bicycle_data()
+    get_toulouse_realtime_bicycle_data()
     get_commune_data()
     print("Data ingestion ended.")
 
