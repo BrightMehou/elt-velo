@@ -58,20 +58,23 @@ def paris_consolidate_station_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
 
+def get_city_code(name):
+    con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
+
+    requete = f"""SELECT ID FROM CONSOLIDATE_CITY 
+             WHERE lower(NAME) = '{name}'
+             AND CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_CITY)"""
+    code = con.sql(requete).fetchall()[0][0]
+    return code
+
 def nantes_consolidate_station_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
-    requete = """SELECT ID FROM CONSOLIDATE_CITY 
-             WHERE NAME='Nantes'
-             AND CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_CITY)"""
-    con.sql(requete).show()
-    code_nantes = con.sql(requete).fetchall()[0][0]
-
     data = load_json_file("nantes_realtime_bicycle_data.json")
     nantes_raw_data_df = pd.json_normalize(data)
     nantes_raw_data_df["id"] = nantes_raw_data_df["number"].apply(lambda x: f"{NANTES_CITY_CODE}-{x}")
-    nantes_raw_data_df["city_code"] = code_nantes
+    nantes_raw_data_df["city_code"] = get_city_code("nantes")
     nantes_raw_data_df["created_date"] = date.today()
 
     nantes_station_data_df = nantes_raw_data_df[[
@@ -103,16 +106,10 @@ def toulouse_consolidate_station_data():
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
-    requete = """SELECT ID FROM CONSOLIDATE_CITY 
-             WHERE NAME='Toulouse'
-             AND CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_CITY)"""
-    con.sql(requete).show()
-    code_toulouse = con.sql(requete).fetchall()[0][0]
-
     data = load_json_file("toulouse_realtime_bicycle_data.json")
     toulouse_raw_data_df = pd.json_normalize(data)
     toulouse_raw_data_df["id"] = toulouse_raw_data_df["number"].apply(lambda x: f"{TOULOUSE_CITY_CODE}-{x}")
-    toulouse_raw_data_df["city_code"] = code_toulouse
+    toulouse_raw_data_df["city_code"] = get_city_code("toulouse")
     toulouse_raw_data_df["created_date"] = date.today()
 
     toulouse_station_data_df = toulouse_raw_data_df[[

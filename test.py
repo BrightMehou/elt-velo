@@ -22,9 +22,8 @@ requete = """
           AS tmp ON ds.id = tmp.station_id;
           """
 con.sql(requete).show()
-
-print("RUN")
-requete = """SELECT CITY_CODE FROM CONSOLIDATE_STATION  """
+requete = """
+          SELECT * from CONSOLIDATE_STATION where city_name ='nantes';
+          """
 con.sql(requete).show()
-
 con.close()
