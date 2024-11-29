@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-def get_paris_realtime_bicycle_data():
+def get_paris_realtime_bicycle_data() -> None:
     
     url = "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/exports/json"
     
@@ -11,7 +11,7 @@ def get_paris_realtime_bicycle_data():
     
     serialize_data(response.text, "paris_realtime_bicycle_data.json")
 
-def get_nante_realtime_bicycle_data():
+def get_nante_realtime_bicycle_data() -> None:
     
     url = "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/exports/json"
     
@@ -19,7 +19,7 @@ def get_nante_realtime_bicycle_data():
     
     serialize_data(response.text, "nantes_realtime_bicycle_data.json")
 
-def get_toulouse_realtime_bicycle_data():
+def get_toulouse_realtime_bicycle_data() -> None:
     
     url = "https://data.toulouse-metropole.fr/api/explore/v2.1/catalog/datasets/api-velo-toulouse-temps-reel/exports/json?lang=fr&timezone=Europe%2FParis"
     
@@ -27,7 +27,7 @@ def get_toulouse_realtime_bicycle_data():
     
     serialize_data(response.text, "toulouse_realtime_bicycle_data.json")
 
-def get_commune_data():
+def get_commune_data() -> None:
     
     url = "https://geo.api.gouv.fr/communes"
     
@@ -35,7 +35,7 @@ def get_commune_data():
 
     serialize_data(response.text, "commune_data.json")
 
-def serialize_data(raw_json: str, file_name: str):
+def serialize_data(raw_json: str, file_name: str) -> None:
 
     today_date = datetime.now().strftime("%Y-%m-%d")
     

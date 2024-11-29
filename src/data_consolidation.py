@@ -9,7 +9,7 @@ PARIS_CITY_CODE = 1
 NANTES_CITY_CODE = 2
 TOULOUSE_CITY_CODE = 3
 
-def create_consolidate_tables():
+def create_consolidate_tables() -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     with open("data/sql_statements/create_consolidate_tables.sql") as fd:
         statements = fd.read()
@@ -17,13 +17,13 @@ def create_consolidate_tables():
             print(statement)
             con.execute(statement)
 
-def load_json_file(name):
+def load_json_file(name: str) -> None:
     data = {}
     with open(f"data/raw_data/{today_date}/{name}") as fd:
         data = json.load(fd)
     return data
 
-def paris_consolidate_station_data():
+def paris_consolidate_station_data() -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     data = load_json_file("paris_realtime_bicycle_data.json")
@@ -58,7 +58,7 @@ def paris_consolidate_station_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
 
-def get_city_code(name):
+def get_city_code(name: str)  -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     requete = f"""SELECT ID FROM CONSOLIDATE_CITY 
@@ -67,7 +67,7 @@ def get_city_code(name):
     code = con.sql(requete).fetchall()[0][0]
     return code
 
-def nantes_consolidate_station_data():
+def nantes_consolidate_station_data() -> None:
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
@@ -102,7 +102,7 @@ def nantes_consolidate_station_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM nantes_station_data_df;")
 
-def toulouse_consolidate_station_data():
+def toulouse_consolidate_station_data() -> None:
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
@@ -137,7 +137,7 @@ def toulouse_consolidate_station_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM toulouse_station_data_df;")
 
-def consolidate_station_data():
+def consolidate_station_data() -> None:
 
     paris_consolidate_station_data()
 
@@ -145,7 +145,7 @@ def consolidate_station_data():
 
     toulouse_consolidate_station_data()
 
-def consolidate_city_data():
+def consolidate_city_data() -> None:
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
@@ -164,7 +164,7 @@ def consolidate_city_data():
     
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_CITY SELECT * FROM commune_df;")
 
-def paris_consolidate_station_statement_data():
+def paris_consolidate_station_statement_data() -> None:
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
@@ -188,7 +188,7 @@ def paris_consolidate_station_statement_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT SELECT * FROM paris_station_statement_data_df;")
 
-def nantes_consolidate_station_statement_data():
+def nantes_consolidate_station_statement_data() -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     data = load_json_file("nantes_realtime_bicycle_data.json")
@@ -211,7 +211,7 @@ def nantes_consolidate_station_statement_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT SELECT * FROM nantes_station_statement_data_df;")
 
-def toulouse_consolidate_station_statement_data():
+def toulouse_consolidate_station_statement_data() -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     data = load_json_file("toulouse_realtime_bicycle_data.json")
@@ -234,7 +234,7 @@ def toulouse_consolidate_station_statement_data():
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT SELECT * FROM toulouse_station_statement_data_df;")
 
-def consolidate_station_statement_data():
+def consolidate_station_statement_data() -> None:
 
     paris_consolidate_station_statement_data()
     

@@ -1,7 +1,7 @@
 import duckdb
 
 
-def create_agregate_tables():
+def create_agregate_tables() -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     with open("data/sql_statements/create_agregate_tables.sql") as fd:
         statements = fd.read()
@@ -10,7 +10,7 @@ def create_agregate_tables():
             con.execute(statement)
 
 
-def agregate_dim_station():
+def agregate_dim_station() -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     
     sql_statement = """
@@ -31,7 +31,7 @@ def agregate_dim_station():
     con.execute(sql_statement)
 
 
-def agregate_dim_city():
+def agregate_dim_city() -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     
     sql_statement = """
@@ -47,7 +47,7 @@ def agregate_dim_city():
     con.execute(sql_statement)
 
 
-def agregate_fact_station_statements():
+def agregate_fact_station_statements() -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     # First we agregate the Paris station statement data
