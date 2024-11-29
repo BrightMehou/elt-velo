@@ -17,7 +17,7 @@ def create_consolidate_tables() -> None:
             print(statement)
             con.execute(statement)
 
-def load_json_file(name: str) -> None:
+def load_json_file(name: str) -> list[dict]:
     data = {}
     with open(f"data/raw_data/{today_date}/{name}") as fd:
         data = json.load(fd)
@@ -58,7 +58,7 @@ def paris_consolidate_station_data() -> None:
 
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
 
-def get_city_code(name: str)  -> None:
+def get_city_code(name: str)  -> str:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     requete = f"""SELECT ID FROM CONSOLIDATE_CITY 

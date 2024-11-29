@@ -18,7 +18,7 @@ from data_ingestion import (
     get_commune_data
 )
 
-def main():
+def main() -> None:
     print("Process start.")
     # data ingestion
 
