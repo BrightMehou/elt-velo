@@ -3,7 +3,7 @@ import duckdb
 
 def create_agregate_tables() -> None:
     """
-    Crée les tables agrégées définies dans un fichier SQL.
+    Crée les tables définies dans un fichier SQL.
 
     Les instructions SQL sont lues depuis un fichier `create_agregate_tables.sql`,
     situé dans le répertoire `data/sql_statements`, et exécutées une par une
@@ -13,6 +13,8 @@ def create_agregate_tables() -> None:
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     with open("data/sql_statements/create_agregate_tables.sql") as fd:
         statements = fd.read()
+
+        # Exécution de chaque instruction SQL séparée par un ";"
         for statement in statements.split(";"):
             print(statement)
             con.execute(statement)

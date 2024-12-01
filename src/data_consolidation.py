@@ -10,20 +10,52 @@ NANTES_CITY_CODE = 2
 TOULOUSE_CITY_CODE = 3
 
 def create_consolidate_tables() -> None:
+    """
+    Crée les tables définies dans un fichier SQL.
+
+    Les instructions SQL sont lues depuis un fichier `create_agregate_tables.sql`,
+    situé dans le répertoire `data/sql_statements`, et exécutées une par une
+    sur la base de données `mobility_analysis.duckdb`.
+    """
+
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
     with open("data/sql_statements/create_consolidate_tables.sql") as fd:
         statements = fd.read()
+
+        # Exécution de chaque instruction SQL séparée par un ";"
         for statement in statements.split(";"):
             print(statement)
             con.execute(statement)
 
 def load_json_file(name: str) -> list[dict]:
+    """
+    Charge un fichier JSON depuis le répertoire des données brutes pour la date du jour.
+
+    Args:
+        name (str): Nom du fichier JSON (incluant l'extension).
+
+    Returns:
+        list[dict]: Données chargées depuis le fichier JSON sous forme de liste de dictionnaires.
+    """
     data = {}
+
     with open(f"data/raw_data/{today_date}/{name}") as fd:
         data = json.load(fd)
+
     return data
 
 def paris_consolidate_station_data() -> None:
+    """
+    Consolidation des données des stations de vélos à Paris.
+
+    Cette fonction :
+    1. Charge les données brutes des stations de vélos à Paris depuis un fichier JSON.
+    2. Transforme et nettoie les données pour les aligner avec le format attendu.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION` de la base DuckDB.
+
+    Les données incluent des informations telles que le code de la station, son nom,
+    sa localisation géographique, sa capacité, et son statut.
+    """
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     data = load_json_file("paris_realtime_bicycle_data.json")
@@ -59,15 +91,41 @@ def paris_consolidate_station_data() -> None:
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
 
 def get_city_code(name: str)  -> str:
+    """
+    Récupère le code d'une ville depuis la table `CONSOLIDATE_CITY` en fonction de son nom.
+
+    Args:
+        name (str): Nom de la ville (non sensible à la casse).
+
+    Returns:
+        str: Code de la ville correspondante.
+
+    Note:
+        - La requête sélectionne la ville dont le nom correspond (indépendamment de la casse).
+        - Le code est extrait des données les plus récentes (basées sur la colonne `CREATED_DATE`).
+    """
+
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     requete = f"""SELECT ID FROM CONSOLIDATE_CITY 
              WHERE lower(NAME) = '{name}'
              AND CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_CITY)"""
     code = con.sql(requete).fetchall()[0][0]
+
     return code
 
 def nantes_consolidate_station_data() -> None:
+    """
+    Consolidation des données des stations de vélos à Paris.
+
+    Cette fonction :
+    1. Charge les données brutes des stations de vélos à Paris depuis un fichier JSON.
+    2. Transforme et nettoie les données pour les aligner avec le format attendu.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION` de la base DuckDB.
+
+    Les données incluent des informations telles que le code de la station, son nom,
+    sa localisation géographique, sa capacité, et son statut.
+    """
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
@@ -103,6 +161,17 @@ def nantes_consolidate_station_data() -> None:
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM nantes_station_data_df;")
 
 def toulouse_consolidate_station_data() -> None:
+    """
+    Consolidation des données des stations de vélos à Paris.
+
+    Cette fonction :
+    1. Charge les données brutes des stations de vélos à Paris depuis un fichier JSON.
+    2. Transforme et nettoie les données pour les aligner avec le format attendu.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION` de la base DuckDB.
+
+    Les données incluent des informations telles que le code de la station, son nom,
+    sa localisation géographique, sa capacité, et son statut.
+    """
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
@@ -146,6 +215,18 @@ def consolidate_station_data() -> None:
     toulouse_consolidate_station_data()
 
 def consolidate_city_data() -> None:
+    """
+    Consolidation des données des communes.
+
+    Cette fonction :
+    1. Charge les données brutes des communes depuis un fichier JSON.
+    2. Transforme et nettoie les données pour les aligner avec le format attendu.
+    3. Supprime les doublons.
+    4. Insère ou remplace ces données dans la table `CONSOLIDATE_CITY` de la base DuckDB.
+
+    Les données incluent des informations telles que l'identifiant INSEE, le nom de la commune
+    et sa population.
+    """
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
@@ -165,6 +246,17 @@ def consolidate_city_data() -> None:
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_CITY SELECT * FROM commune_df;")
 
 def paris_consolidate_station_statement_data() -> None:
+    """
+    Consolidation des données de disponibilité des stations de vélos à Paris.
+
+    Cette fonction :
+    1. Charge les données brutes des disponibilités des stations de vélos à Paris depuis un fichier JSON.
+    2. Transforme et nettoie les données pour les aligner avec le format attendu.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION_STATEMENT` de la base DuckDB.
+
+    Les données incluent des informations sur les stations, telles que le nombre de vélos
+    disponibles, les bornes disponibles, et la dernière date d'actualisation.
+    """
 
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
@@ -189,6 +281,18 @@ def paris_consolidate_station_statement_data() -> None:
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT SELECT * FROM paris_station_statement_data_df;")
 
 def nantes_consolidate_station_statement_data() -> None:
+    """
+    Consolidation des données de disponibilité des stations de vélos à Paris.
+
+    Cette fonction :
+    1. Charge les données brutes des disponibilités des stations de vélos à Paris depuis un fichier JSON.
+    2. Transforme et nettoie les données pour les aligner avec le format attendu.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION_STATEMENT` de la base DuckDB.
+
+    Les données incluent des informations sur les stations, telles que le nombre de vélos
+    disponibles, les bornes disponibles, et la dernière date d'actualisation.
+    """
+
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     data = load_json_file("nantes_realtime_bicycle_data.json")
@@ -212,6 +316,18 @@ def nantes_consolidate_station_statement_data() -> None:
     con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT SELECT * FROM nantes_station_statement_data_df;")
 
 def toulouse_consolidate_station_statement_data() -> None:
+    """
+    Consolidation des données de disponibilité des stations de vélos à Paris.
+
+    Cette fonction :
+    1. Charge les données brutes des disponibilités des stations de vélos à Paris depuis un fichier JSON.
+    2. Transforme et nettoie les données pour les aligner avec le format attendu.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION_STATEMENT` de la base DuckDB.
+
+    Les données incluent des informations sur les stations, telles que le nombre de vélos
+    disponibles, les bornes disponibles, et la dernière date d'actualisation.
+    """
+    
     con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
 
     data = load_json_file("toulouse_realtime_bicycle_data.json")
