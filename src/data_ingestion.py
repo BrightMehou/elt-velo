@@ -18,7 +18,8 @@ def get_realtime_bicycle_data() -> None:
     urls = [
         "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/exports/json",
         "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/exports/json",
-        "https://data.toulouse-metropole.fr/api/explore/v2.1/catalog/datasets/api-velo-toulouse-temps-reel/exports/json?lang=fr&timezone=Europe%2FParis"
+        "https://data.toulouse-metropole.fr/api/explore/v2.1/catalog/datasets/api-velo-toulouse-temps-reel/exports/json?lang=fr&timezone=Europe%2FParis",
+        #"https://opendata.strasbourg.eu/explore/dataset/stations-velhop/api/"
     ]
 
     # Liste des noms de villes correspondant aux URLs
@@ -28,52 +29,13 @@ def get_realtime_bicycle_data() -> None:
         response = requests.request("GET", url)
         try:
             if response.status_code == 200:
-                serialize_data(response.text, city + "_realtime_bicycle_data.json")
+                serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
                 print(f"Les données de {city} ont été récuperées")
             else:
                 print(f"Error: Impossible de récuper les données de {city} (status code: {response.status_code})")
         except requests.exceptions.RequestException as e:
             # Gestion des erreurs liées à la connexion ou à la requête
             print(f"Erreur lors de la connexion à {city} : {e}")
-
-def get_paris_realtime_bicycle_data() -> None:
-    """
-    Récupère les données en temps réel des stations de vélos à Paris 
-    depuis l'API OpenData Paris et les sauvegarde sous forme de fichier JSON.
-
-    Les données sont sauvegardées dans le dossier : `data/raw_data/YYYY-MM-DD`.
-    """
-    url = "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/exports/json"
-    
-    response = requests.request("GET", url)
-    
-    serialize_data(response.text, "paris_realtime_bicycle_data.json")
-
-def get_nante_realtime_bicycle_data() -> None:
-    """
-    Récupère les données en temps réel des stations de vélos à Nantes 
-    depuis l'API Nantes Métropole et les sauvegarde sous forme de fichier JSON.
-
-    Les données sont sauvegardées dans le dossier : `data/raw_data/YYYY-MM-DD`.
-    """
-    url = "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/exports/json"
-    
-    response = requests.request("GET", url)
-    
-    serialize_data(response.text, "nantes_realtime_bicycle_data.json")
-
-def get_toulouse_realtime_bicycle_data() -> None:
-    """
-    Récupère les données en temps réel des stations de vélos à Toulouse 
-    depuis l'API Toulouse Métropole et les sauvegarde sous forme de fichier JSON.
-
-    Les données sont sauvegardées dans le dossier : `data/raw_data/YYYY-MM-DD`.
-    """
-    url = "https://data.toulouse-metropole.fr/api/explore/v2.1/catalog/datasets/api-velo-toulouse-temps-reel/exports/json?lang=fr&timezone=Europe%2FParis"
-    
-    response = requests.request("GET", url)
-    
-    serialize_data(response.text, "toulouse_realtime_bicycle_data.json")
 
 def get_commune_data() -> None:
     """

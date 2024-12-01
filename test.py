@@ -26,4 +26,8 @@ requete = """
           SELECT * from CONSOLIDATE_STATION where city_name ='nantes';
           """
 con.sql(requete).show()
+requete = """
+          SELECT * from CONSOLIDATE_STATION_STATEMENT where STATION_ID like '2%';
+          """
+con.sql(requete).show()
 con.close()
