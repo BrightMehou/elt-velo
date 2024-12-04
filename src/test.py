@@ -10,7 +10,7 @@ requete = """
             SELECT CITY_ID, SUM(BICYCLE_DOCKS_AVAILABLE) AS SUM_BICYCLE_DOCKS_AVAILABLE 
             FROM FACT_STATION_STATEMENT WHERE CREATED_DATE = (SELECT MAX(CREATED_DATE) 
             FROM CONSOLIDATE_STATION) 
-          GROUP BY CITY_ID) tmp ON dm.ID = tmp.CITY_ID WHERE lower(dm.NAME) in ('paris', 'nantes', 'vincennes', 'toulouse');
+          GROUP BY CITY_ID) tmp ON dm.ID = tmp.CITY_ID WHERE lower(dm.NAME) in ('paris', 'nantes', 'vincennes', 'toulouse', 'strasbourg');
           """
 con.sql(requete).show()
 print("-- Nb de vélos disponibles en moyenne dans chaque station")
@@ -23,11 +23,11 @@ requete = """
           """
 con.sql(requete).show()
 requete = """
-          SELECT * from CONSOLIDATE_STATION where city_name ='nantes';
+          SELECT * from CONSOLIDATE_STATION where city_name ='strasbourg';
           """
 con.sql(requete).show()
 requete = """
-          SELECT * from CONSOLIDATE_STATION_STATEMENT where STATION_ID like '2%';
+          SELECT * from CONSOLIDATE_STATION_STATEMENT where STATION_ID like '4%';
           """
 con.sql(requete).show()
 con.close()

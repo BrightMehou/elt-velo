@@ -4,10 +4,10 @@ import requests
 
 def get_realtime_bicycle_data() -> None:
     """
-    Récupération des données en temps réel des vélos en libre-service pour Paris, Nantes, et Toulouse.
+    Récupération des données en temps réel des vélos en libre-service pour Paris, Nantes, Toulouse et Strasbourg.
 
     Cette fonction :
-    1. Télécharge les données en temps réel depuis les API ouvertes des trois villes.
+    1. Télécharge les données en temps réel depuis les API ouvertes des quatre villes.
     2. Sauvegarde les données JSON dans des fichiers locaux spécifiques pour chaque ville.
     3. Affiche un message pour indiquer si les données ont été récupérées avec succès ou si une erreur s'est produite.
 
@@ -19,23 +19,20 @@ def get_realtime_bicycle_data() -> None:
         "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/exports/json",
         "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/exports/json",
         "https://data.toulouse-metropole.fr/api/explore/v2.1/catalog/datasets/api-velo-toulouse-temps-reel/exports/json?lang=fr&timezone=Europe%2FParis",
-        #"https://opendata.strasbourg.eu/explore/dataset/stations-velhop/api/"
+        "https://opendata.strasbourg.eu/api/explore/v2.1/catalog/datasets/stations-velhop/exports/json?lang=fr&timezone=Europe%2FBerlin"
     ]
 
     # Liste des noms de villes correspondant aux URLs
-    cities = ["paris", "nantes", "toulouse"]
+    cities = ["paris", "nantes", "toulouse","strasbourg"]
 
     for url, city in zip(urls,cities):
         response = requests.request("GET", url)
-        try:
-            if response.status_code == 200:
-                serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
-                print(f"Les données de {city} ont été récuperées")
-            else:
-                print(f"Error: Impossible de récuper les données de {city} (status code: {response.status_code})")
-        except requests.exceptions.RequestException as e:
-            # Gestion des erreurs liées à la connexion ou à la requête
-            print(f"Erreur lors de la connexion à {city} : {e}")
+        if response.status_code == 200:
+           serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
+           print(f"Les données de {city} ont été récuperées")
+        else:
+           print(f"Error: Impossible de récuper les données de {city} (status code: {response.status_code})")
+
 
 def get_commune_data() -> None:
     """

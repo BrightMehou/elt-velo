@@ -8,7 +8,8 @@ today_date = datetime.now().strftime("%Y-%m-%d")
 PARIS_CITY_CODE = 1
 NANTES_CITY_CODE = 2
 TOULOUSE_CITY_CODE = 3
-duckdb_path = "data/duckdb/mobility_analysis.duckdb"
+STRASBOURG_CITY_CODE = 4
+duckdb_path = "data/duckdb/mobility_analysis.duckdb" # Chemin d'accès du fichier mobility_analysis.duckdb
 
 def create_consolidate_tables() -> None:
     """
@@ -52,10 +53,7 @@ def paris_consolidate_station_data() -> None:
     Cette fonction :
     1. Charge les données brutes des stations de vélos à Paris depuis un fichier JSON.
     2. Transforme et nettoie les données pour les aligner avec le format attendu.
-    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION` de la base DuckDB.
-
-    Les données incluent des informations telles que le code de la station, son nom,
-    sa localisation géographique, sa capacité, et son statut.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION` de la base mobility_analysis.
     """
     con = duckdb.connect(database = duckdb_path, read_only = False)
 
@@ -102,7 +100,6 @@ def get_city_code(name: str)  -> str:
         str: Code de la ville correspondante.
 
     Note:
-        - La requête sélectionne la ville dont le nom correspond (indépendamment de la casse).
         - Le code est extrait des données les plus récentes (basées sur la colonne `CREATED_DATE`).
     """
 
@@ -122,11 +119,7 @@ def nantes_toulouse_consolidate_station_data() -> None:
     Cette fonction :
     1. Charge les données brutes pour chaque ville depuis des fichiers JSON.
     2. Transforme et nettoie les données pour les aligner avec le format attendu.
-    3. Ajoute ou met à jour les données consolidées des stations dans la table `CONSOLIDATE_STATION` de la base DuckDB.
-
-    Les données incluent des informations sur les stations, telles que :
-    - Identifiant unique (basé sur le code de la ville et le numéro de station),
-    - Nom de la station, coordonnées, adresse, capacité, et statut.
+    3. Ajoute ou met à jour les données consolidées des stations dans la table `CONSOLIDATE_STATION` de la base mobility_analysis
     """
 
     # Liste des villes et de leurs codes correspondants
@@ -168,11 +161,61 @@ def nantes_toulouse_consolidate_station_data() -> None:
         con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM station_data_df;")
         con.close()
 
+def strasbourg_consolidate_station_data() -> None:
+    """
+    Consolidation des données des stations de vélos à Strasbourg.
+
+    Cette fonction :
+    1. Charge les données brutes des stations de vélos à Strasbourg depuis un fichier JSON.
+    2. Transforme et nettoie les données pour les aligner avec le format attendu.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION` de la base mobility_analysis.
+    """
+      
+    con = duckdb.connect(database = duckdb_path, read_only = False)
+
+    data = load_json_file("strasbourg_realtime_bicycle_data.json")
+    strasbourg_raw_data_df = pd.json_normalize(data)
+    strasbourg_raw_data_df["id_CONSOLIDATE_STATION"] = strasbourg_raw_data_df["id"].apply(lambda x: f"{STRASBOURG_CITY_CODE}-{x}")
+    # le nom de la ville n'existe pas dans les données brute. Il faut donc l'encodé en dure dans le code
+    strasbourg_raw_data_df["city_name"] = 'strasbourg' 
+    strasbourg_raw_data_df["city_code"] = get_city_code('strasbourg')
+    strasbourg_raw_data_df["address"] = None
+    strasbourg_raw_data_df["created_date"] = date.today()
+
+    strasbourg_station_data_df = strasbourg_raw_data_df[[
+        "id_CONSOLIDATE_STATION",
+        "id",
+        "na",
+        "city_name",
+        "city_code",
+        "address",
+        "lon",
+        "lat",
+        "is_installed",
+        "created_date",
+        "to"
+    ]]
+
+    strasbourg_station_data_df.rename(columns={
+        "id_CONSOLIDATE_STATION": "id",
+        "id": "code",
+        "na": "name",
+        "lon": "longitude",
+        "lat": "latitude",
+        "is_installed": "status",
+        "to": "capacity",
+    }, inplace=True)
+
+    con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM strasbourg_station_data_df;")
+
+
 def consolidate_station_data() -> None:
 
     paris_consolidate_station_data()
 
     nantes_toulouse_consolidate_station_data()
+
+    strasbourg_consolidate_station_data()
 
 def consolidate_city_data() -> None:
     """
@@ -181,8 +224,7 @@ def consolidate_city_data() -> None:
     Cette fonction :
     1. Charge les données brutes des communes depuis un fichier JSON.
     2. Transforme et nettoie les données pour les aligner avec le format attendu.
-    3. Supprime les doublons.
-    4. Insère ou remplace ces données dans la table `CONSOLIDATE_CITY` de la base DuckDB.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_CITY` de la base mobility_analysis.
 
     Les données incluent des informations telles que l'identifiant INSEE, le nom de la commune
     et sa population.
@@ -199,7 +241,6 @@ def consolidate_city_data() -> None:
         "nom": "name",
         "population" : "nb_inhabitants"
     }, inplace=True)
-    commune_df.drop_duplicates(inplace = True)
 
     commune_df["created_date"] = date.today()
     
@@ -212,10 +253,7 @@ def paris_consolidate_station_statement_data() -> None:
     Cette fonction :
     1. Charge les données brutes des disponibilités des stations de vélos à Paris depuis un fichier JSON.
     2. Transforme et nettoie les données pour les aligner avec le format attendu.
-    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION_STATEMENT` de la base DuckDB.
-
-    Les données incluent des informations sur les stations, telles que le nombre de vélos
-    disponibles, les bornes disponibles, et la dernière date d'actualisation.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION_STATEMENT` de la base mobility_analysis.
     """
 
     con = duckdb.connect(database = duckdb_path, read_only = False)
@@ -248,12 +286,7 @@ def nantes_toulouse_consolidate_station_statement_data() -> None:
     1. Charge les données brutes pour chaque ville depuis des fichiers JSON.
     2. Transforme et nettoie les données pour les aligner avec le format attendu.
     3. Ajoute ou met à jour les données consolidées des états de stations dans la table
-       `CONSOLIDATE_STATION_STATEMENT` de la base DuckDB.
-
-    Les données incluent des informations sur :
-    - Le nombre de vélos disponibles (`bicycle_available`),
-    - Le nombre de bornes disponibles (`bicycle_docks_available`),
-    - La date du dernier relevé (`last_statement_date`).
+       `CONSOLIDATE_STATION_STATEMENT` de la base mobility_analysis.
     """
     
     # Liste des villes et de leurs codes correspondants
@@ -284,8 +317,44 @@ def nantes_toulouse_consolidate_station_statement_data() -> None:
         con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT SELECT * FROM station_statement_data_df;")
         con.close()
 
+def strasbourg_consolidate_station_statement_data() -> None:
+    """
+    Consolidation des données de disponibilité des stations de vélos à Strasbourg.
+
+    Cette fonction :
+    1. Charge les données brutes des disponibilités des stations de vélos à Strasbourg depuis un fichier JSON.
+    2. Transforme et nettoie les données pour les aligner avec le format attendu.
+    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION_STATEMENT` de la base mobility_analysis.
+    """
+
+    con = duckdb.connect(database = duckdb_path, read_only = False)
+    
+
+    data = load_json_file("strasbourg_realtime_bicycle_data.json")
+    strasbourg_raw_data_df = pd.json_normalize(data)
+    strasbourg_raw_data_df["station_id"] = strasbourg_raw_data_df["id"].apply(lambda x: f"{STRASBOURG_CITY_CODE}-{x}")
+    strasbourg_raw_data_df["last_statement_date"] = strasbourg_raw_data_df["last_reported"].apply(lambda x: datetime.fromtimestamp(int(x)).strftime('%Y-%m-%d'))
+    strasbourg_raw_data_df["created_date"] = date.today()
+
+    strasbourg_station_statement_data_df = strasbourg_raw_data_df[[
+        "station_id",
+        "num_docks_available",
+        "av",
+        "last_statement_date",
+        "created_date"
+    ]]
+    
+    strasbourg_station_statement_data_df.rename(columns={
+        "num_docks_available": "bicycle_docks_available",
+        "av": "bicycle_available",
+    }, inplace=True)
+
+    con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT SELECT * FROM strasbourg_station_statement_data_df;")
+
 def consolidate_station_statement_data() -> None:
 
     paris_consolidate_station_statement_data()
 
     nantes_toulouse_consolidate_station_statement_data()
+
+    strasbourg_consolidate_station_statement_data()
