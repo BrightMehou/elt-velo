@@ -1,37 +1,5 @@
 # Sujet de travaux pratiques "Introduction à la data ingénierie"
-
-Le but de ce projet est de créer un pipeline ETL d'ingestion, de transformation et de stockage de données pour mettre en pratique les connaissances acquises lors du cours d'introduction à la data ingénierie. Ce sujet présenté propose d'utiliser les données d'utilisation des bornes de vélos open-sources et "temps réel" des bornes de vélos dans les grandes villes de France.
-
-```bash 
-docker-compose build     
-
-docker-compose run airflow-webserver airflow db init
-
-docker-compose run airflow-webserver airflow users create \
-    --username admin \
-    --password admin \
-    --firstname Admin \
-    --lastname User \
-    --role Admin \
-    --email admin@example.com
-
-docker-compose up -d
-
-
-docker-compose down   
-
-docker-compose down -v     
-
-docker image prune -a 
-
-docker volume prune     
-
-docker network prune 
-```
-
-Le sujet propose une base qui est un pipeline ETL complet qui couvre la récupération, le stockage et la transformation des données open sources de la ville de Paris.
-
-Le but du sujet de travaux pratiques est d'ajouter à ce pipeline des données provenant d'autres grandes villes de France. Ces données sont disponibles pour les villes de Nantes, de Toulouse ou encore de Strasbourg. Il faudra aussi enrichir ces données avec les données descriptives des villes de France, via une API de l'État français open-source.
+Ce projet vise à créer un pipeline pour collecter, transformer et analyser les données des systèmes de vélos en libre-service de plusieurs villes françaises, notamment Paris, Nantes, Toulouse et Strasbourg. Il utilise les API ouvertes des villes pour obtenir des données en temps réel sur les stations et les vélos disponibles, les consolide et les aggrèges dans une base de données DuckDB pour une des analyses ultérieurs.
 
 ## Explication du code existant
 
@@ -45,19 +13,7 @@ Le projet est découpé en 3 parties :
 
 ### Ingestion des données
 
-```python
-def get_paris_realtime_bicycle_data():
-    url = "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/exports/json"
-    response = requests.request("GET", url)
-    serialize_data(response.text, "paris_realtime_bicycle_data.json")
 
-def serialize_data(raw_json: str, file_name: str):
-    today_date = datetime.now().strftime("%Y-%m-%d")
-    if not os.path.exists(f"data/raw_data/{today_date}"):
-        os.makedirs(f"data/raw_data/{today_date}")
-    with open(f"data/raw_data/{today_date}/{file_name}", "w") as fd:
-        fd.write(raw_json)
-```
 
 Ces fonctions python sont assez simples. Elles récupèrent les données sur une API open-source, et les stockent dans un fichier json localement. Ces fonctions sont dans le fichier python `data_ingestion.py`.
 
@@ -67,53 +23,8 @@ Ces fonctions python sont assez simples. Elles récupèrent les données sur une
 
 Dans le fichier `data_consolidation.py` on trouve une fonction qui permet de créer les tables dans une base de données **duckdb**. On utilise le fichier `create_consolidate_tables.sql` pour définir les schémas des tables. Vous ne devriez pas avoir à modifier les schémas des tables, mais vous pouvez le faire si vous voyez une optimisation ou si le schéma est contraignant pour vous pour la réalisation de ce TP.
 
-```python
-def create_consolidate_tables():
-    con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
-    with open("data/sql_statements/create_consolidate_tables.sql") as fd:
-        statements = fd.read()
-    for statement in statements.split(";"):
-        print(statement)
-        con.execute(statement)
-```
 
 Une fois les tables créées, on peut lancer les autres fonctions de consolidation. Elles fonctionnent toutes de la même manière :
-
-```python
-def consolidate_station_data():
-    con = duckdb.connect(database = "data/duckdb/mobility_analysis.duckdb", read_only = False)
-    data = {}
-    # Consolidation logic for Paris Bicycle data
-    with open(f"data/raw_data/{today_date}/paris_realtime_bicycle_data.json") as fd:
-        data = json.load(fd)
-    paris_raw_data_df = pd.json_normalize(data)
-    paris_raw_data_df["id"] = paris_raw_data_df["stationcode"].apply(lambda x: f"{PARIS_CITY_CODE}-{x}")
-    paris_raw_data_df["address"] = None
-    paris_raw_data_df["created_date"] = date.today()
-    paris_station_data_df = paris_raw_data_df[[
-        "id",
-        "stationcode",
-        "name",
-        "nom_arrondissement_communes",
-        "code_insee_commune",
-        "address",
-        "coordonnees_geo.lon",
-        "coordonnees_geo.lat",
-        "is_installed",
-        "created_date",
-        "capacity"
-    ]]
-    paris_station_data_df.rename(columns={
-        "stationcode": "code",
-        "name": "name",
-        "coordonnees_geo.lon": "longitude",
-        "coordonnees_geo.lat": "latitude",
-        "is_installed": "status",
-        "nom_arrondissement_communes": "city_name",
-        "code_insee_commune": "city_code"
-    }, inplace=True)
-    con.execute("INSERT OR REPLACE INTO CONSOLIDATE_STATION SELECT * FROM paris_station_data_df;")
-```
 
 Explication de cette fonction :
 
@@ -209,29 +120,45 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
-## Sujet du TP
+```bash 
+docker-compose build     
+
+docker-compose run airflow-webserver airflow db init
+
+docker-compose run airflow-webserver airflow users create \
+    --username admin \
+    --password admin \
+    --firstname Admin \
+    --lastname User \
+    --role Admin \
+    --email admin@example.com
+
+docker-compose up -d
+
+
+docker-compose down   
+
+docker-compose down -v     
+
+docker image prune -a 
+
+docker volume prune     
+
+docker network prune 
+```
+## Sources des données 
 
 Le but de ce TP est d'enrichir ce pipeline avec des données provenant d'autres villes. Les sources de données disponibles sont :
+
+- [Open data Paris](https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/api/)
 
 - [Open data Nantes](https://data.nantesmetropole.fr/explore/dataset/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/api/)
 
 - [Open data Toulouse](https://data.toulouse-metropole.fr/explore/dataset/api-velo-toulouse-temps-reel/api/)
 
-**L'ajout d'une seule source de données est suffisant.**
-
-Aussi, il faut remplacer la source de données des tables `CONSOLIDATE_CITY` et `DIM_CITY` par les données provenant de l'API suivante :
+- [Open data Strasbourg]([https://geo.api.gouv.fr/communes](https://data.strasbourg.eu/explore/dataset/stations-velhop/api/))
 
 - [Open data communes](https://geo.api.gouv.fr/communes)
-
-Une fois l'acquisition de ces nouvelles données réalisée, il faut enrichir le pipeline avec les étapes suivantes :
-
-- ajouter les données de la nouvelle ville dans la consolidation des tables `CONSOLIDATE_STATION` et `CONSOLIDATE_STATION_STATEMENT`
-
-- remplacer la consolidation de `CONSOLIDATE_CITY` et l'adapter pour utiliser les données des communes récupérées plus haut
-
-- adapter si besoin les processus d'agrégation des tables `DIM_STATION` et `FACT_STATION_STATEMENT` et `DIM_CITY`
-
-Au final, le pipeline ETL manager devrait ressembler à ce qui suit :
 
 ![Process final](images/image_2.png)
 
@@ -256,19 +183,3 @@ FROM DIM_STATION ds JOIN (
     GROUP BY station_id
 ) AS tmp ON ds.id = tmp.station_id;
 ```
-
-Le sujet devra être rendu sous la forme d'un repository GitHub. Le projet peut être fait seul ou en duo.
-
-### Barème utilisé pour la notation finale :
-
-- Les ingestions fonctionnent correctement et produisent des fichiers json localement (5 points)
-
-- La consolidation actuelle est correctement enrichie avec les nouvelles données (5 points)
-
-- L'agrégation des données est correctement réalisée et les requêtes SQL ci-dessus fonctionnent correctement (5 points)
-
-- Le projet est correctement documenté (installation, exécution, explication de la logique du pipeline) (5 points)
-
-- 2 points bonus pour la clarté générale du code (commentaires, noms de variables, etc.)
-
-- 2 points bonus si d'autres sources de données sont ajoutées pour enrichir l'analyse finale. Attention, le projet doit fonctionner correctement.
