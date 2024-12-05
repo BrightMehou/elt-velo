@@ -2,6 +2,65 @@
 Ce projet consiste à construire un pipeline pour la collecte, la transformation et l'analyse des données des systèmes de vélos en libre-service de plusieurs villes françaises : Paris, Nantes, Toulouse et Strasbourg.  
 L'objectif est de consolider et aggréger ces données dans une base DuckDB pour permettre des analyses ultérieurs.
 
+---
+
+## 🎯 **Cahier des charges**
+
+Le pipeline doit permettre de réaliser les actions suivantes :  
+
+### **1. Collecter des données en temps réel**  
+- **Description :**  
+  Le pipeline doit être capable d'interroger les APIs des villes ciblées (Paris, Nantes, Toulouse, et Strasbourg) pour récupérer :  
+  - La liste des stations de vélos en libre-service.  
+  - Le statut en temps réel des vélos et des docks disponibles.  
+- **Résultat attendu :**  
+  Les données collectées doivent être enregistrées sous forme de fichiers JSON dans le dossier `data/raw_data` organisé par date.
+
+---
+
+### **2. Normaliser et consolider les données brutes**  
+- **Description :**  
+  Les données collectées depuis différentes APIs doivent être nettoyées et structurées afin d'être harmonisées dans un format commun. Les étapes incluent :  
+  - Création d’identifiants uniques pour les villes et les stations.  
+  - Normalisation des noms des colonnes et des types de données.  
+  - Enrichissement des données avec des informations additionnelles (par exemple, des codes INSEE pour les villes).  
+- **Résultat attendu :**  
+  Les données consolidées doivent être chargées dans une base de données DuckDB, dans les tables suivante :  
+  - `CONSOLIDATE_CITY` : Données sur les villes.  
+  - `CONSOLIDATE_STATION` : Données sur les stations.  
+  - `CONSOLIDATE_STATION_STATEMENT` : Données en temps réel sur les vélos et les docks disponibles.
+
+---
+
+### **3. Aggréger les données pour des analyses**  
+- **Description :**  
+  Les données consolidées doivent être aggrégées pour répondre aux questions analytiques suivantes :  
+  - Nombre moyen de vélos disponibles par station.
+  - Nombre de docks disponibles pour chaque ville.  
+- **Résultat attendu :**  
+  Les réponses aux requêtes analytiques doivent pouvoir être facilement exécutées depuis la base DuckDB via des scripts SQL ou Python (par exemple `query_duckdb.py`).
+
+---
+
+### **4. Automatiser les traitements via Airflow**  
+- **Description :**  
+  Les différentes étapes du pipeline (ingestion, consolidation, aggrégation) doivent être automatisées et orchestrées dans un workflow reproductible avec Apache Airflow.  
+- **Résultat attendu :**  
+  - Les tâches doivent être définies dans un DAG et exécutées dans l’ordre défini.  
+  - Le pipeline doit se réexécuter automatiquement chaque jour à minuit.
+  - Le service doit être dockerisé
+ 
+---
+## 📥 **Sources des Données**
+
+- [API Paris](https://opendata.paris.fr/explore/dataset/velib-disponibilite-en-temps-reel/api/)  
+- [API Nantes](https://data.nantesmetropole.fr/explore/dataset/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/api/)  
+- [API Toulouse](https://data.toulouse-metropole.fr/explore/dataset/api-velo-toulouse-temps-reel/api/)  
+- [API Strasbourg](https://data.strasbourg.eu/explore/dataset/stations-velhop/api/)  
+- [API Open Data Communes](https://geo.api.gouv.fr/communes)  
+
+---
+
 ## 🗂️ **Structure du Projet**
 
 ```plaintext
@@ -96,7 +155,7 @@ Exécutez le script pour interroger les données consolidées :
 python src/query_duckdb.py
 ```
 
-### **Exemple de requêtes analytiques** :
+vous devez obtenir les résultats des requêtes suivantes
 
 #### 1. Nombre d'emplacements disponibles pour les vélos dans une ville :
 ```sql
@@ -122,35 +181,11 @@ JOIN (
 ) tmp ON ds.ID = tmp.STATION_ID;
 ```
 
----
+Vous pouvez également modifirer le fichier src/query_duckdb.py pour exécuter vos propres requêtes ou télécharger l'exécutable suivant sur le site de Duckdb.
 
-## 📥 **Sources des Données**
-
-- [API Vélib' Métropole (Paris)](https://opendata.paris.fr/explore/dataset/velib-disponibilite-en-temps-reel/api/)  
-- [API Nantes Métropole](https://data.nantesmetropole.fr/explore/dataset/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/api/)  
-- [API Toulouse Métropole](https://data.toulouse-metropole.fr/explore/dataset/api-velo-toulouse-temps-reel/api/)  
-- [API Strasbourg](https://data.strasbourg.eu/explore/dataset/stations-velhop/api/)  
-- [API Open Data Communes](https://geo.api.gouv.fr/communes)  
+[Duckdb installation](https://duckdb.org/docs/installation/)
 
 ---
 
-## 🌟 **Améliorations Futures**
-
-1. Ajouter d'autres villes européennes pour étendre la couverture géographique.  
-2. Mettre en place des dashboards interactifs avec **Tableau** ou **Dash**.  
-3. Intégrer un orchestrateur plus avancé comme **Kestra** ou **Prefect**.  
-4. Automatiser la surveillance des pipelines avec des métriques clés.  
-5. Intégrer une API REST pour exposer les données consolidées à des applications tierces.
-
----
-
-## 🎓 **Objectif Pédagogique**
-
-Ce projet a été conçu pour permettre une introduction pratique à la data ingénierie. Les étudiants apprennent à :
-- Collecter des données via des APIs.
-- Construire un pipeline de données ETL avec des outils modernes.
-- Travailler avec DuckDB pour des analyses rapides et efficaces.
-
----
-
+Ces objectifs définissent ce que votre pipeline doit accomplir de manière fonctionnelle, garantissant un produit final opérationnel, évolutif et fiable.
 ![Diagramme Processus Final](images/image_2.png)
