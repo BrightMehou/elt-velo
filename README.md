@@ -2,6 +2,33 @@
 
 Le but de ce projet est de créer un pipeline ETL d'ingestion, de transformation et de stockage de données pour mettre en pratique les connaissances acquises lors du cours d'introduction à la data ingénierie. Ce sujet présenté propose d'utiliser les données d'utilisation des bornes de vélos open-sources et "temps réel" des bornes de vélos dans les grandes villes de France.
 
+```bash 
+docker-compose build     
+
+docker-compose run airflow-webserver airflow db init
+
+docker-compose run airflow-webserver airflow users create \
+    --username admin \
+    --password admin \
+    --firstname Admin \
+    --lastname User \
+    --role Admin \
+    --email admin@example.com
+
+docker-compose up -d
+
+
+docker-compose down   
+
+docker-compose down -v     
+
+docker image prune -a 
+
+docker volume prune     
+
+docker network prune 
+```
+
 Le sujet propose une base qui est un pipeline ETL complet qui couvre la récupération, le stockage et la transformation des données open sources de la ville de Paris.
 
 Le but du sujet de travaux pratiques est d'ajouter à ce pipeline des données provenant d'autres grandes villes de France. Ces données sont disponibles pour les villes de Nantes, de Toulouse ou encore de Strasbourg. Il faudra aussi enrichir ces données avec les données descriptives des villes de France, via une API de l'État français open-source.
