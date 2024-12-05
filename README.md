@@ -150,13 +150,13 @@ docker network prune
 
 Le but de ce TP est d'enrichir ce pipeline avec des données provenant d'autres villes. Les sources de données disponibles sont :
 
-- [Open data Paris](https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/api/)
+- [Open data Paris](https://opendata.paris.fr/explore/dataset/velib-disponibilite-en-temps-reel/api/)
 
 - [Open data Nantes](https://data.nantesmetropole.fr/explore/dataset/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/api/)
 
 - [Open data Toulouse](https://data.toulouse-metropole.fr/explore/dataset/api-velo-toulouse-temps-reel/api/)
 
-- [Open data Strasbourg]([https://geo.api.gouv.fr/communes](https://data.strasbourg.eu/explore/dataset/stations-velhop/api/))
+- [Open data Strasbourg](https://data.strasbourg.eu/explore/dataset/stations-velhop/api/)
 
 - [Open data communes](https://geo.api.gouv.fr/communes)
 
