@@ -43,8 +43,8 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 
 ### **1. Ingestion des données**
 **Objectif** : Récupérer des données brutes depuis des sources externes.
-
-#### Étapes :
+#### Étapes : 
+Dans le fichier python `data_ingestion.py`
 - **`get_realtime_bicycle_data`** : 
   - Récupère les données en temps réel sur les vélos disponibles des villes (Paris, Nantes, Toulouse, Strasbourg).
 - **`get_commune_data`** : 
@@ -59,6 +59,7 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 **Objectif** : Organiser et structurer les données brutes pour préparer leur utilisation.
 
 #### Étapes :
+Dans le fichier python `data_consolidation.py`
 - **`create_consolidate_tables`** :
   - Crée les tables nécessaires pour stocker les données consolidées.
 - **`consolidate_city_data`** :
@@ -77,6 +78,7 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 **Objectif** : Synthétiser les données consolidées pour créer des vues ou métriques prêtes à l'analyse.
 
 #### Étapes :
+Dans le fichier python `data_agregation.py`
 - **`create_agregate_tables`** :
   - Crée les tables nécessaires pour stocker les données agrégées.
 - **`agregate_dim_city`** :
