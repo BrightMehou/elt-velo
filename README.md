@@ -1,4 +1,4 @@
-# 🚴 Sujet de travaux pratiques "Introduction à la data ingénierie 
+## 🚴 Sujet de travaux pratiques "Introduction à la data ingénierie 
 Ce projet consiste à construire un pipeline pour la collecte, la transformation et l'analyse des données des systèmes de vélos en libre-service de plusieurs villes françaises : Paris, Nantes, Toulouse et Strasbourg.  
 L'objectif est de consolider et aggréger ces données dans une base DuckDB pour permettre des analyses ultérieurs.
 
@@ -39,7 +39,8 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 ```
 
 ---
-### **Résumé du Workflow du Projet**
+
+## ⚙️ **Workflow du Projet**
 
 ### **1. Ingestion des données**
 **Objectif** : Récupérer des données brutes depuis des sources externes.
