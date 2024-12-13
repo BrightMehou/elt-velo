@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 import requests
 
+
 def get_realtime_bicycle_data() -> None:
     """
     Récupération des données en temps réel des vélos en libre-service pour Paris, Nantes, Toulouse et Strasbourg.
@@ -19,41 +20,46 @@ def get_realtime_bicycle_data() -> None:
         "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/exports/json",
         "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/exports/json",
         "https://data.toulouse-metropole.fr/api/explore/v2.1/catalog/datasets/api-velo-toulouse-temps-reel/exports/json?lang=fr&timezone=Europe%2FParis",
-        "https://opendata.strasbourg.eu/api/explore/v2.1/catalog/datasets/stations-velhop/exports/json?lang=fr&timezone=Europe%2FBerlin"
+        "https://opendata.strasbourg.eu/api/explore/v2.1/catalog/datasets/stations-velhop/exports/json?lang=fr&timezone=Europe%2FBerlin",
     ]
 
     # Liste des noms de villes correspondant aux URLs
-    cities = ["paris", "nantes", "toulouse","strasbourg"]
+    cities = ["paris", "nantes", "toulouse", "strasbourg"]
 
-    for url, city in zip(urls,cities):
+    for url, city in zip(urls, cities):
         response = requests.request("GET", url)
         if response.status_code == 200:
-           serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
-           print(f"Les données de {city} ont été récuperées")
+            serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
+            print(f"Les données de {city} ont été récuperées")
         else:
-           print(f"Error: Impossible de récuper les données de {city} (status code: {response.status_code})")
+            print(
+                f"Error: Impossible de récuper les données de {city} (status code: {response.status_code})"
+            )
 
 
 def get_commune_data() -> None:
     """
-    Récupère les données des communes françaises depuis l'API GeoAPI et 
+    Récupère les données des communes françaises depuis l'API GeoAPI et
     les sauvegarde sous forme de fichier JSON.
 
     Les données sont sauvegardées dans le dossier : `data/raw_data/YYYY-MM-DD`.
     """
     url = "https://geo.api.gouv.fr/communes"
-    
+
     response = requests.request("GET", url)
 
     if response.status_code == 200:
         serialize_data(response.text, "commune_data.json")
         print(f"Les données des communes ont été récuperées")
     else:
-        print(f"Error: Impossible de récuper les données des communes (status code: {response.status_code})")
+        print(
+            f"Error: Impossible de récuper les données des communes (status code: {response.status_code})"
+        )
+
 
 def serialize_data(raw_json: str, file_name: str) -> None:
     """
-    Sauvegarde les données brutes JSON dans un fichier sous le répertoire 
+    Sauvegarde les données brutes JSON dans un fichier sous le répertoire
     `data/raw_data/YYYY-MM-DD`.
 
     Args:
@@ -62,7 +68,7 @@ def serialize_data(raw_json: str, file_name: str) -> None:
     """
 
     today_date = datetime.now().strftime("%Y-%m-%d")
-    
+
     if not os.path.exists(f"data/raw_data/{today_date}"):
         os.makedirs(f"data/raw_data/{today_date}")
 

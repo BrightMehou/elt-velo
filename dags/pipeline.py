@@ -29,12 +29,12 @@ default_args = {
 
 # Définition du DAG
 with DAG(
-    dag_id="data_pipeline",          # Nom unique pour le DAG
-    default_args=default_args,       # Arguments par défaut
+    dag_id="data_pipeline",  # Nom unique pour le DAG
+    default_args=default_args,  # Arguments par défaut
     description="Pipeline de traitement des données",
-    schedule_interval="@daily",      # Planification (quotidienne ici)
-    start_date=datetime(2024, 12, 1),# Date de début
-    catchup=False,                   # Ne pas exécuter les dates passées
+    schedule_interval="@daily",  # Planification (quotidienne ici)
+    start_date=datetime(2024, 12, 1),  # Date de début
+    catchup=False,  # Ne pas exécuter les dates passées
 ) as dag:
 
     # Tâches d'ingestion
@@ -91,4 +91,13 @@ with DAG(
     )
 
     # Définir les dépendances entre les tâches
-    [task_get_bicycle_data, task_get_commune_data, task_create_consolidate_tables ] >> task_consolidate_city_data >> task_consolidate_station_data >> task_consolidate_station_statement_data >> task_create_agregate_tables >> task_agregate_dim_city >> task_agregate_dim_station >> task_agregate_fact_station_statements
+    (
+        [task_get_bicycle_data, task_get_commune_data, task_create_consolidate_tables]
+        >> task_consolidate_city_data
+        >> task_consolidate_station_data
+        >> task_consolidate_station_statement_data
+        >> task_create_agregate_tables
+        >> task_agregate_dim_city
+        >> task_agregate_dim_station
+        >> task_agregate_fact_station_statements
+    )

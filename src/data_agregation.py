@@ -3,6 +3,7 @@ import duckdb
 
 duckdb_path = "data/duckdb/mobility_analysis.duckdb"
 
+
 def create_agregate_tables() -> None:
     """
     Crée les tables définies dans un fichier SQL.
@@ -12,7 +13,7 @@ def create_agregate_tables() -> None:
     sur la base de données `mobility_analysis.duckdb`.
     """
 
-    con = duckdb.connect(database = duckdb_path, read_only = False)
+    con = duckdb.connect(database=duckdb_path, read_only=False)
     with open("data/sql_statements/create_agregate_tables.sql") as fd:
         statements = fd.read()
 
@@ -30,8 +31,8 @@ def agregate_dim_station() -> None:
     Les données insérées contiennent des informations sur les stations de vélos.
     """
 
-    con = duckdb.connect(database = duckdb_path, read_only = False)
-    
+    con = duckdb.connect(database=duckdb_path, read_only=False)
+
     sql_statement = """
     INSERT OR REPLACE INTO DIM_STATION
     SELECT 
@@ -59,8 +60,8 @@ def agregate_dim_city() -> None:
     nombre d'habitants.
     """
 
-    con = duckdb.connect(database = duckdb_path, read_only = False)
-    
+    con = duckdb.connect(database=duckdb_path, read_only=False)
+
     sql_statement = """
     INSERT OR REPLACE INTO DIM_CITY
     SELECT 
@@ -83,8 +84,8 @@ def agregate_fact_station_statements() -> None:
     incluant les vélos disponibles, les bornes libres, et des informations liées aux
     villes correspondantes.
     """
-    
-    con = duckdb.connect(database = duckdb_path, read_only = False)
+
+    con = duckdb.connect(database=duckdb_path, read_only=False)
 
     # First we agregate the Paris station statement data
     sql_statement = """
@@ -98,5 +99,5 @@ def agregate_fact_station_statements() -> None:
         AND CONSOLIDATE_STATION.CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_STATION)
         AND cc.CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_CITY);
     """
-    
+
     con.execute(sql_statement)

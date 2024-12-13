@@ -2,7 +2,7 @@ from data_agregation import (
     create_agregate_tables,
     agregate_dim_city,
     agregate_dim_station,
-    agregate_fact_station_statements
+    agregate_fact_station_statements,
 )
 from data_consolidation import (
     create_consolidate_tables,
@@ -11,10 +11,8 @@ from data_consolidation import (
     consolidate_station_statement_data,
 )
 
-from data_ingestion import (
-    get_realtime_bicycle_data,
-    get_commune_data
-)
+from data_ingestion import get_realtime_bicycle_data, get_commune_data
+
 
 def main() -> None:
     print("Process start.")
@@ -41,6 +39,7 @@ def main() -> None:
     agregate_dim_station()
     agregate_fact_station_statements()
     print("Agregate data ended.")
-    
+
+
 if __name__ == "__main__":
     main()
