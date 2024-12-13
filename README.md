@@ -93,8 +93,8 @@ Le pipeline doit permettre de réaliser les actions suivantes :
 
 1. **Cloner le dépôt :**  
    ```bash
-   git clone https://github.com/kevinl75/polytech-de-101-2024-tp-subject.git
-   cd polytech-de-101-2024-tp-subject
+   git clone https://github.com/BrightMehou/ETL_VELO.git
+   cd ETL_VELO
    ```
 
 2. **Créer et activer un environnement virtuel :**  

@@ -22,7 +22,6 @@ services:
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./plugins:/opt/airflow/plugins
       - ./data:/opt/airflow/data
       
     ports:
@@ -40,7 +39,6 @@ services:
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./plugins:/opt/airflow/plugins
       - ./data:/opt/airflow/data
 
     command: scheduler
