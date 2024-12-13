@@ -86,6 +86,74 @@ Le pipeline doit permettre de réaliser les actions suivantes :
 ```
 
 ---
+### **Résumé du Workflow du Projet**
+
+### **1. Ingestion des données**
+**Objectif** : Récupérer des données brutes depuis des sources externes.
+
+#### Étapes :
+- **`get_realtime_bicycle_data`** : 
+  - Récupère les données en temps réel sur les vélos disponibles des villes (Paris, Nantes, Toulouse, Strasbourg).
+- **`get_commune_data`** : 
+  - Récupère des données sur les communes.
+
+#### Produits :
+- Les données brutes sont enregistrées dans les fichiers JSON dans le répertoire dédié.
+
+---
+
+### **2. Consolidation des données**
+**Objectif** : Organiser et structurer les données brutes pour préparer leur utilisation.
+
+#### Étapes :
+- **`create_consolidate_tables`** :
+  - Crée les tables nécessaires pour stocker les données consolidées.
+- **`consolidate_city_data`** :
+  - Structure et nettoie les données des communes pour les préparer à l'analyse.
+- **`consolidate_station_data`** :
+  - Prépare et organise les informations sur les stations de vélos.
+- **`consolidate_station_statement_data`** :
+  - Traite et structure les données liées aux états des stations, comme le nombre de vélos disponibles.
+
+#### Produits :
+- Les données consolidées sont enregistrées dans Duckdb et prêtes à être utilisées dans des étapes analytiques ou agrégées.
+
+---
+
+### **3. Agrégation des données**
+**Objectif** : Synthétiser les données consolidées pour créer des vues ou métriques prêtes à l'analyse.
+
+#### Étapes :
+- **`create_agregate_tables`** :
+  - Crée les tables nécessaires pour stocker les données agrégées.
+- **`agregate_dim_city`** :
+  - Met à jour la table dimensionnelle des villes (**DIM_CITY**) avec les données les plus récentes, telles que le nombre d’habitants.
+- **`agregate_dim_station`** :
+  - Met à jour la table dimensionnelle des stations (**DIM_STATION**) avec les informations consolidées les plus récentes.
+- **`agregate_fact_station_statements`** :
+  - Met à jour la table factuelle des états des stations (**FACT_STATION_STATEMENT**) en associant les informations des stations et des villes.
+
+#### Produits :
+- Les données finales sont stockées sous forme de tables agrégées dans Duckdb, prêtes pour des analyses ou des visualisations.
+
+---
+
+### **Relations Entre les Tables**
+- **Consolidation** :
+  - Les données brutes alimentent les tables consolidées : **CONSOLIDATE_CITY**, **CONSOLIDATE_STATION**, **CONSOLIDATE_STATION_STATEMENT**.
+- **Agrégation** :
+  - Les tables consolidées sont utilisées pour construire les tables agrégées : **DIM_CITY**, **DIM_STATION**, **FACT_STATION_STATEMENT**.
+
+---
+
+### **Usage Pratique**
+- **Visualisation des Données** : Les tables agrégées peuvent être utilisées dans un outil comme Tableau, MetaBase, ou directement en SQL pour créer des rapports ou tableaux de bord.
+- **Analyse** : Les données agrégées peuvent être analysées pour extraire des tendances ou des métriques spécifiques, comme le taux d’utilisation des stations ou les villes avec les stations les plus occupées.
+
+Souhaitez-vous que je développe une visualisation ou que j’explique un aspect en particulier ?
+## ⚙️ **Workflow du Projet**
+
+---
 
 ## 🚀 **Installation et Exécution**
 
@@ -144,11 +212,11 @@ Le pipeline doit permettre de réaliser les actions suivantes :
    ```
 
 5. **Accéder à l'interface Airflow :**  
-   Rendez-vous sur [http://localhost:8080](http://localhost:8080).
+   Rendez-vous sur [http://localhost:8080](http://localhost:8080) et connectez-vous avec le nom d'utilisateur `admin` et le mot de passe `admin`.
 
 ---
 
-## 📊 **Analyse des Résultats**
+## 📊 **Analyse des données**
 
 Exécutez le script pour interroger les données consolidées :  
 ```bash
