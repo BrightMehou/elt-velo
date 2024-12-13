@@ -91,23 +91,6 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 
 ---
 
-### **Relations Entre les Tables**
-- **Consolidation** :
-  - Les données brutes alimentent les tables consolidées : **CONSOLIDATE_CITY**, **CONSOLIDATE_STATION**, **CONSOLIDATE_STATION_STATEMENT**.
-- **Agrégation** :
-  - Les tables consolidées sont utilisées pour construire les tables agrégées : **DIM_CITY**, **DIM_STATION**, **FACT_STATION_STATEMENT**.
-
----
-
-### **Usage Pratique**
-- **Visualisation des Données** : Les tables agrégées peuvent être utilisées dans un outil comme Tableau, MetaBase, ou directement en SQL pour créer des rapports ou tableaux de bord.
-- **Analyse** : Les données agrégées peuvent être analysées pour extraire des tendances ou des métriques spécifiques, comme le taux d’utilisation des stations ou les villes avec les stations les plus occupées.
-
-Souhaitez-vous que je développe une visualisation ou que j’explique un aspect en particulier ?
-## ⚙️ **Workflow du Projet**
-
----
-
 ## 🚀 **Installation et Exécution**
 
 ### **Sans Orchestration Airflow**
