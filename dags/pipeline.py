@@ -1,8 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
-
-# Importez vos fonctions Python nécessaires
 from src.data_ingestion import get_realtime_bicycle_data, get_commune_data
 from src.data_consolidation import (
     create_consolidate_tables,

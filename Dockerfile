@@ -11,4 +11,6 @@ COPY data/ /opt/airflow/data/
 USER airflow
 
 ENV AIRFLOW_HOME=/opt/airflow
+
+# Rajoute le pythonpath
 ENV PYTHONPATH="/opt/airflow/:${PYTHONPATH}"

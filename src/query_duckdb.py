@@ -24,14 +24,4 @@ requete = """
           """
 con.sql(requete).show()
 
-requete = """
-          SELECT * from CONSOLIDATE_STATION where city_name ='strasbourg';
-          """
-con.sql(requete).show()
-
-requete = """
-          SELECT * from CONSOLIDATE_STATION_STATEMENT where STATION_ID like '4%';
-          """
-con.sql(requete).show()
-
 con.close()
