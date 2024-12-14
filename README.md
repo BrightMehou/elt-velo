@@ -30,7 +30,6 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 │   ├── data_ingestion.py     # Ingestion des données en temps réel
 │   ├── main.py               # Point d'entrée principal
 │   └── query_duckdb.py       # Requêtes analytiques DuckDB
-├── images/                   # Images pour documentation et visualisation
 ├── Dockerfile                # Configuration Docker pour Airflow
 ├── docker-compose.yml        # Orchestration Docker Compose
 ├── docker_requirements.txt   # Dépendances Python spécifiques à Docker
