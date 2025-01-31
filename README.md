@@ -99,7 +99,7 @@ Dans le fichier python `data_agregation.py`
 
 1. **Cloner le dépôt :**  
    ```bash
-   git clone https://github.com/BrightMehou/ETL_VELO.git
+   git clone https://github.com/BrightMehou/etl-velo.git
    cd ETL_VELO
    ```
 

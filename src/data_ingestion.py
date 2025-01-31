@@ -1,6 +1,12 @@
 import os
 from datetime import datetime
 import requests
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 def get_realtime_bicycle_data() -> None:
@@ -28,9 +34,9 @@ def get_realtime_bicycle_data() -> None:
         response = requests.request("GET", url)
         if response.status_code == 200:
             serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
-            print(f"Les données de {city} ont été récuperées")
+            logger.info(f"Les données de {city} ont été récuperées")
         else:
-            print(
+            logger.error(
                 f"Error: Impossible de récuper les données de {city} (status code: {response.status_code})"
             )
 
@@ -48,9 +54,9 @@ def get_commune_data() -> None:
 
     if response.status_code == 200:
         serialize_data(response.text, "commune_data.json")
-        print(f"Les données des communes ont été récuperées")
+        logger.info(f"Les données des communes ont été récuperées")
     else:
-        print(
+        logger.error(
             f"Error: Impossible de récuper les données des communes (status code: {response.status_code})"
         )
 

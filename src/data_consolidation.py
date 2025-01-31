@@ -2,8 +2,13 @@ import json
 from datetime import datetime, date
 import duckdb
 import pandas as pd
+import logging
 
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 today_date = datetime.now().strftime("%Y-%m-%d")
 
 # Les code des villes
@@ -30,8 +35,8 @@ def create_consolidate_tables() -> None:
 
         # Exécution de chaque instruction SQL séparée par un ";"
         for statement in statements.split(";"):
-            print(statement)
             con.execute(statement)
+        logger.info("Consolidate tables created if they didn't exist.")
 
 
 def load_json_file(name: str) -> list[dict]:

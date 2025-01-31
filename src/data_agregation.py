@@ -1,6 +1,11 @@
 import duckdb
+import logging
 
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 duckdb_path = "data/duckdb/mobility_analysis.duckdb"
 
 
@@ -19,8 +24,8 @@ def create_agregate_tables() -> None:
 
         # Exécution de chaque instruction SQL séparée par un ";"
         for statement in statements.split(";"):
-            print(statement)
             con.execute(statement)
+        logger.info("Agregate tables created if they didn't exist.")
 
 
 def agregate_dim_station() -> None:

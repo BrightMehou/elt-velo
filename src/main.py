@@ -1,3 +1,4 @@
+import logging
 from data_agregation import (
     create_agregate_tables,
     agregate_dim_city,
@@ -10,35 +11,40 @@ from data_consolidation import (
     consolidate_station_data,
     consolidate_station_statement_data,
 )
-
 from data_ingestion import get_realtime_bicycle_data, get_commune_data
 
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+
 def main() -> None:
-    print("Process start.")
+    logger.info("Process start.")
     # data ingestion
 
-    print("Data ingestion started.")
+    logger.info("Data ingestion started.")
     get_realtime_bicycle_data()
     get_commune_data()
-    print("Data ingestion ended.")
+    logger.info("Data ingestion ended.")
 
     # data consolidation
-    print("Consolidation data started.")
+    logger.info("Consolidation data started.")
     create_consolidate_tables()
     consolidate_city_data()
     consolidate_station_data()
     consolidate_station_statement_data()
 
-    print("Consolidation data ended.")
+    logger.info("Consolidation data ended.")
 
     # data agregation
-    print("Agregate data started.")
+    logger.info("Agregate data started.")
     create_agregate_tables()
     agregate_dim_city()
     agregate_dim_station()
     agregate_fact_station_statements()
-    print("Agregate data ended.")
+    logger.info("Agregate data ended.")
 
 
 if __name__ == "__main__":
