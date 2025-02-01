@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:15
@@ -17,13 +19,13 @@ services:
     restart: always
     depends_on:
       - postgres
+      - airflow-init
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
     volumes:
       - ./dags:/opt/airflow/dags
       - ./data:/opt/airflow/data
-      
     ports:
       - "8080:8080"
     command: webserver
@@ -40,8 +42,19 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
       - ./data:/opt/airflow/data
-
     command: scheduler
+
+  airflow-init:
+    build: .
+    container_name: airflow-init
+    depends_on:
+      - postgres
+    environment:
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    entrypoint: >
+      sh -c "airflow db init &&
+             airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com"
+    # Ce conteneur peut s'arrêter après l'initialisation
 
 volumes:
   postgres_data:

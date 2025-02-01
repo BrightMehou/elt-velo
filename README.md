@@ -123,33 +123,15 @@ Dans le fichier python `data_agregation.py`
 
 ### **Avec Orchestration Airflow**
 
-1. **Construire les images Docker :**  
-   ```bash
-   docker-compose build
-   ```
+1. **Installer Docker** : 
+   Si Docker n'est pas encore installé : [Docker installation](https://www.docker.com/)
 
-2. **Initialiser la base de données Airflow :**  
-   ```bash
-   docker-compose run airflow-webserver airflow db init
-   ```
-
-3. **Créer un utilisateur administrateur pour Airflow :**  
-   ```bash
-   docker-compose run airflow-webserver airflow users create \
-       --username admin \
-       --password admin \
-       --firstname Admin \
-       --lastname User \
-       --role Admin \
-       --email admin@example.com
-   ```
-
-4. **Lancer les services Airflow :**  
+2. **Construire les images Docker et lancer les containeurs :**  
    ```bash
    docker-compose up -d
    ```
 
-5. **Accéder à l'interface Airflow :**  
+3. **Accéder à l'interface Airflow :**  
    Rendez-vous sur [http://localhost:8080](http://localhost:8080) et connectez-vous avec le nom d'utilisateur `admin` et le mot de passe `admin`.
 
 ---
