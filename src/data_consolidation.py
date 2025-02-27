@@ -76,7 +76,8 @@ def paris_consolidate_station_data() -> None:
     paris_raw_data_df["address"] = None
     paris_raw_data_df["created_date"] = date.today()
 
-    paris_station_data_df = paris_raw_data_df[
+    paris_station_data_df = paris_raw_data_df.loc[
+        :,
         [
             "id",
             "stationcode",
@@ -89,7 +90,7 @@ def paris_consolidate_station_data() -> None:
             "is_installed",
             "created_date",
             "capacity",
-        ]
+        ],
     ]
 
     paris_station_data_df.rename(
@@ -159,7 +160,8 @@ def nantes_toulouse_consolidate_station_data() -> None:
         )  # Récupération du code INSEE de la ville
         raw_data_df["created_date"] = date.today()
 
-        station_data_df = raw_data_df[
+        station_data_df = raw_data_df.loc[
+            :,
             [
                 "id",
                 "number",
@@ -172,7 +174,7 @@ def nantes_toulouse_consolidate_station_data() -> None:
                 "status",
                 "created_date",
                 "bike_stands",
-            ]
+            ],
         ]
 
         station_data_df.rename(
@@ -215,7 +217,8 @@ def strasbourg_consolidate_station_data() -> None:
     strasbourg_raw_data_df["address"] = None
     strasbourg_raw_data_df["created_date"] = date.today()
 
-    strasbourg_station_data_df = strasbourg_raw_data_df[
+    strasbourg_station_data_df = strasbourg_raw_data_df.loc[
+        :,
         [
             "id_CONSOLIDATE_STATION",
             "id",
@@ -228,7 +231,7 @@ def strasbourg_consolidate_station_data() -> None:
             "is_installed",
             "created_date",
             "to",
-        ]
+        ],
     ]
 
     strasbourg_station_data_df.rename(
@@ -275,7 +278,7 @@ def consolidate_city_data() -> None:
 
     data = load_json_file("commune_data.json")
     raw_data_df = pd.json_normalize(data)
-    commune_df = raw_data_df[["code", "nom", "population"]]
+    commune_df = raw_data_df.loc[:, ["code", "nom", "population"]]
 
     commune_df.rename(
         columns={"code": "id", "nom": "name", "population": "nb_inhabitants"},
@@ -305,14 +308,15 @@ def paris_consolidate_station_statement_data() -> None:
         lambda x: f"{PARIS_CITY_CODE}-{x}"
     )
     paris_raw_data_df["created_date"] = date.today()
-    paris_station_statement_data_df = paris_raw_data_df[
+    paris_station_statement_data_df = paris_raw_data_df.loc[
+        :,
         [
             "station_id",
             "numdocksavailable",
             "numbikesavailable",
             "duedate",
             "created_date",
-        ]
+        ],
     ]
 
     paris_station_statement_data_df.rename(
@@ -353,14 +357,15 @@ def nantes_toulouse_consolidate_station_statement_data() -> None:
             lambda x: f"{city_code}-{x}"
         )
         raw_data_df["created_date"] = date.today()
-        station_statement_data_df = raw_data_df[
+        station_statement_data_df = raw_data_df.loc[
+            :,
             [
                 "station_id",
                 "available_bike_stands",
                 "available_bikes",
                 "last_update",
                 "created_date",
-            ]
+            ],
         ]
 
         station_statement_data_df.rename(
@@ -401,14 +406,15 @@ def strasbourg_consolidate_station_statement_data() -> None:
     ].apply(lambda x: datetime.fromtimestamp(int(x)).strftime("%Y-%m-%d"))
     strasbourg_raw_data_df["created_date"] = date.today()
 
-    strasbourg_station_statement_data_df = strasbourg_raw_data_df[
+    strasbourg_station_statement_data_df = strasbourg_raw_data_df.loc[
+        :,
         [
             "station_id",
             "num_docks_available",
             "av",
             "last_statement_date",
             "created_date",
-        ]
+        ],
     ]
 
     strasbourg_station_statement_data_df.rename(

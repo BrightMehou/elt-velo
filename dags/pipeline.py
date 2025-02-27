@@ -1,6 +1,8 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.decorators import task
 from datetime import datetime, timedelta
+
+# Import des fonctions de traitement des données
 from src.data_ingestion import get_realtime_bicycle_data, get_commune_data
 from src.data_consolidation import (
     create_consolidate_tables,
@@ -15,7 +17,7 @@ from src.data_agregation import (
     agregate_fact_station_statements,
 )
 
-# Configuration par défaut pour les tâches
+# Configuration par défaut des tâches
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
@@ -27,75 +29,65 @@ default_args = {
 
 # Définition du DAG
 with DAG(
-    dag_id="data_pipeline",  # Nom unique pour le DAG
-    default_args=default_args,  # Arguments par défaut
+    dag_id="data_pipeline",
+    default_args=default_args,
     description="Pipeline de traitement des données",
-    schedule_interval="@daily",  # Planification (quotidienne ici)
-    start_date=datetime(2024, 12, 1),  # Date de début
-    catchup=False,  # Ne pas exécuter les dates passées
+    schedule_interval="@daily",
+    start_date=datetime(2024, 12, 1),
+    catchup=False,
 ) as dag:
 
     # Tâches d'ingestion
-    task_get_bicycle_data = PythonOperator(
-        task_id="get_realtime_bicycle_data",
-        python_callable=get_realtime_bicycle_data,
-    )
+    @task
+    def task_get_bicycle_data():
+        get_realtime_bicycle_data()
 
-    task_get_commune_data = PythonOperator(
-        task_id="get_commune_data",
-        python_callable=get_commune_data,
-    )
+    @task
+    def task_get_commune_data():
+        get_commune_data()
 
     # Tâches de consolidation
-    task_create_consolidate_tables = PythonOperator(
-        task_id="create_consolidate_tables",
-        python_callable=create_consolidate_tables,
-    )
+    @task
+    def task_create_consolidate_tables():
+        create_consolidate_tables()
 
-    task_consolidate_city_data = PythonOperator(
-        task_id="consolidate_city_data",
-        python_callable=consolidate_city_data,
-    )
+    @task
+    def task_consolidate_city_data():
+        consolidate_city_data()
 
-    task_consolidate_station_data = PythonOperator(
-        task_id="consolidate_station_data",
-        python_callable=consolidate_station_data,
-    )
+    @task
+    def task_consolidate_station_data():
+        consolidate_station_data()
 
-    task_consolidate_station_statement_data = PythonOperator(
-        task_id="consolidate_station_statement_data",
-        python_callable=consolidate_station_statement_data,
-    )
+    @task
+    def task_consolidate_station_statement_data():
+        consolidate_station_statement_data()
 
     # Tâches d'agrégation
-    task_create_agregate_tables = PythonOperator(
-        task_id="create_agregate_tables",
-        python_callable=create_agregate_tables,
-    )
+    @task
+    def task_create_agregate_tables():
+        create_agregate_tables()
 
-    task_agregate_dim_city = PythonOperator(
-        task_id="agregate_dim_city",
-        python_callable=agregate_dim_city,
-    )
+    @task
+    def task_agregate_dim_city():
+        agregate_dim_city()
 
-    task_agregate_dim_station = PythonOperator(
-        task_id="agregate_dim_station",
-        python_callable=agregate_dim_station,
-    )
+    @task
+    def task_agregate_dim_station():
+        agregate_dim_station()
 
-    task_agregate_fact_station_statements = PythonOperator(
-        task_id="agregate_fact_station_statements",
-        python_callable=agregate_fact_station_statements,
-    )
+    @task
+    def task_agregate_fact_station_statements():
+        agregate_fact_station_statements()
 
-    # Définir les dépendances entre les tâches
+    # Définition des dépendances entre les tâches
     (
-        [task_get_bicycle_data, task_get_commune_data, task_create_consolidate_tables]
-        >> task_consolidate_city_data
-        >> task_consolidate_station_data
-        >> task_consolidate_station_statement_data
-        >> task_create_agregate_tables
-        >> task_agregate_dim_city
-        >> task_agregate_dim_station
-        >> task_agregate_fact_station_statements
+        [task_get_bicycle_data(), task_get_commune_data(), task_create_consolidate_tables()]
+        >> task_consolidate_city_data()
+        >> task_consolidate_station_data()
+        >> task_consolidate_station_statement_data()
+        >> task_create_agregate_tables()
+        >> task_agregate_dim_city()
+        >> task_agregate_dim_station()
+        >> task_agregate_fact_station_statements()
     )
