@@ -1,7 +1,9 @@
 from airflow import DAG
 from airflow.decorators import task
 from datetime import datetime, timedelta
+import logging
 
+logger = logging.getLogger(__name__)
 # Import des fonctions de traitement des données
 from src.data_ingestion import get_realtime_bicycle_data, get_commune_data
 from src.data_consolidation import (

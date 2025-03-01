@@ -1,4 +1,4 @@
-FROM apache/airflow:2.10.3-python3.12
+FROM apache/airflow:2.10.5-python3.12
 
 # Copier les fichiers du projet dans l'image Docker
 COPY docker_requirements.txt /docker_requirements.txt
