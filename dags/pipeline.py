@@ -84,7 +84,11 @@ with DAG(
 
     # Définition des dépendances entre les tâches
     (
-        [task_get_bicycle_data(), task_get_commune_data(), task_create_consolidate_tables()]
+        [
+            task_get_bicycle_data(),
+            task_get_commune_data(),
+            task_create_consolidate_tables(),
+        ]
         >> task_consolidate_city_data()
         >> task_consolidate_station_data()
         >> task_consolidate_station_statement_data()

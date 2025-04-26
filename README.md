@@ -33,7 +33,6 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 ├── Dockerfile                # Configuration Docker pour Airflow
 ├── docker-compose.yml        # Orchestration Docker Compose
 ├── docker_requirements.txt   # Dépendances Python spécifiques à Docker
-├── requirements.txt          # Liste des dépendances Python
 └── README.md                 # Documentation du projet
 ```
 
@@ -103,20 +102,17 @@ Dans le fichier python `data_agregation.py`
    cd ETL_VELO
    ```
 
-2. **Créer et activer un environnement virtuel :**  
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate  # Sous Windows : .venv\Scripts\activate
-   ```
+2. **Installer Poetry :**  
+   Si Poetry n'est pas encore installé : [Poetry](https://python-poetry.org/docs/)
 
 3. **Installer les dépendances :**  
    ```bash
-   pip install -r requirements.txt
+   poetry install --no-root
    ```
 
 4. **Exécuter le script principal :**  
    ```bash
-   python src/main.py
+   poetry run python src/main.py
    ```
 
 ---
@@ -140,7 +136,7 @@ Dans le fichier python `data_agregation.py`
 
 Exécutez le script pour interroger les données consolidées :  
 ```bash
-python src/query_duckdb.py
+poetry run python src/query_duckdb.py
 ```
 
 vous devez obtenir les résultats des requêtes suivantes
