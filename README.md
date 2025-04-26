@@ -33,6 +33,8 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 ├── Dockerfile                # Configuration Docker pour Airflow
 ├── docker-compose.yml        # Orchestration Docker Compose
 ├── docker_requirements.txt   # Dépendances Python spécifiques à Docker
+├── poetry.lock               # Verrouillage des dépendances Poetry
+├── pyproject.toml            # Configuration du projet Poetry
 └── README.md                 # Documentation du projet
 ```
 

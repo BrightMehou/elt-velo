@@ -1,7 +1,6 @@
 services:
   postgres:
     image: postgres:16
-    container_name: postgres
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -13,7 +12,6 @@ services:
 
   airflow-webserver:
     build: .
-    container_name: airflow-webserver
     restart: always
     depends_on:
       - postgres
@@ -25,13 +23,13 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
       - ./data:/opt/airflow/data
+      - ./src:/opt/airflow/src
     ports:
       - "8080:8080"
     command: webserver
 
   airflow-scheduler:
     build: .
-    container_name: airflow-scheduler
     restart: always
     depends_on:
       - postgres
@@ -42,11 +40,11 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
       - ./data:/opt/airflow/data
+      - ./src:/opt/airflow/src
     command: scheduler
 
   airflow-init:
     build: .
-    container_name: airflow-init
     depends_on:
       - postgres
     environment:
