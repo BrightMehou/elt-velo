@@ -76,5 +76,5 @@ def serialize_data(raw_json: str, file_name: str) -> None:
     if not os.path.exists(f"data/raw_data/{today_date}"):
         os.makedirs(f"data/raw_data/{today_date}")
 
-    with open(f"data/raw_data/{today_date}/{file_name}", "w") as fd:
+    with open(f"data/raw_data/{today_date}/{file_name}", "w", encoding="utf-8") as fd:
         fd.write(raw_json)
