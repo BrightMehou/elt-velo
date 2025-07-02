@@ -67,8 +67,7 @@ Dans le fichier python `data_consolidation.py`
   - Structure et nettoie les données des communes pour les préparer à l'analyse.
 - **`consolidate_station_data`** :
   - Prépare et organise les informations sur les stations de vélos.
-- **`consolidate_station_statement_data`** :
-  - Traite et structure les données liées aux états des stations, comme le nombre de vélos disponibles.
+
 
 #### Produits :
 - Les données consolidées sont enregistrées dans Duckdb et prêtes à être utilisées dans des étapes analytiques ou agrégées.
@@ -101,7 +100,7 @@ Dans le fichier python `data_agregation.py`
 1. **Cloner le dépôt :**  
    ```bash
    git clone https://github.com/BrightMehou/etl-velo.git
-   cd ETL_VELO
+   cd etl-velo
    ```
 
 2. **Installer Poetry :**  
