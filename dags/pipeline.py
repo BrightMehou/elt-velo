@@ -10,7 +10,6 @@ from src.data_consolidation import (
     create_consolidate_tables,
     consolidate_city_data,
     consolidate_station_data,
-    consolidate_station_statement_data,
 )
 from src.data_agregation import (
     create_agregate_tables,
@@ -61,10 +60,6 @@ with DAG(
     def task_consolidate_station_data():
         consolidate_station_data()
 
-    @task
-    def task_consolidate_station_statement_data():
-        consolidate_station_statement_data()
-
     # Tâches d'agrégation
     @task
     def task_create_agregate_tables():
@@ -91,7 +86,6 @@ with DAG(
         ]
         >> task_consolidate_city_data()
         >> task_consolidate_station_data()
-        >> task_consolidate_station_statement_data()
         >> task_create_agregate_tables()
         >> task_agregate_dim_city()
         >> task_agregate_dim_station()

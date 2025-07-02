@@ -7,7 +7,7 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
+today_date = datetime.now().strftime("%Y-%m-%d")
 
 def get_realtime_bicycle_data() -> None:
     """
@@ -71,7 +71,7 @@ def serialize_data(raw_json: str, file_name: str) -> None:
         file_name (str): Nom du fichier dans lequel les données seront sauvegardées.
     """
 
-    today_date = datetime.now().strftime("%Y-%m-%d")
+
 
     if not os.path.exists(f"data/raw_data/{today_date}"):
         os.makedirs(f"data/raw_data/{today_date}")

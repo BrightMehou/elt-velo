@@ -1,5 +1,4 @@
 duckdb
-pandas
 requests
 sqlalchemy
 apache-airflow-providers-sqlite
