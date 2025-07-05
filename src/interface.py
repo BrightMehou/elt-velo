@@ -1,117 +1,161 @@
+import os
+import logging
 import streamlit as st
 import duckdb
-import pandas as pd
+import plotly.express as px
 
-# Connexion à la base
-con = duckdb.connect(database="data/duckdb/mobility_analysis.duckdb", read_only=True)
+# ----------------------------
+# Configuration du logging
+# ----------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+logger.info("Démarrage de l'application Streamlit.")
 
+# ----------------------------
+# Configuration de la page
+# ----------------------------
+st.set_page_config(
+    page_title="Tableau de bord mobilité 🚲",
+    layout="wide"
+)
+
+# ----------------------------
+# Connexion DuckDB
+# ----------------------------
+con = duckdb.connect(
+    database="data/duckdb/mobility_analysis.duckdb",
+    read_only=True
+)
+logger.info("Connexion à DuckDB établie.")
+
+# ----------------------------
+# Titre et description
+# ----------------------------
 st.title("📊 Tableau de bord des stations de vélos 🚲")
+st.markdown("""
+Cette application présente :
+1. Les données brutes des indicateurs  
+2. Une carte interactive centrée sur Paris  
+3. Les indicateurs clés sous forme de tableaux  
+""")
 
-st.sidebar.title("📌 Sélection des indicateurs")
+# ----------------------------
+# 1️⃣ Données brutes
+# ----------------------------
+with st.expander("🔍 Voir les données brutes"):
+    # Brutes : Stations
+    st.markdown("**Données brutes des stations**")
+    df_stations = con.execute("SELECT * FROM DIM_STATION").df()
+    st.dataframe(df_stations, use_container_width=True)
 
-# 1️⃣ Nb d'emplacements disponibles de vélos dans certaines villes
-if st.sidebar.checkbox("Nb d'emplacements disponibles de vélos par ville", value=True):
-    st.subheader("Nb d'emplacements disponibles de vélos dans une ville")
-    requete = """
-        SELECT dm.NAME, tmp.SUM_BICYCLE_DOCKS_AVAILABLE 
-        FROM DIM_CITY dm 
-        INNER JOIN (
-            SELECT CITY_ID, SUM(BICYCLE_DOCKS_AVAILABLE) AS SUM_BICYCLE_DOCKS_AVAILABLE 
-            FROM FACT_STATION_STATEMENT 
-            WHERE CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_STATION)
-            GROUP BY CITY_ID
-        ) tmp ON dm.ID = tmp.CITY_ID 
-        WHERE lower(dm.NAME) in ('paris', 'nantes', 'vincennes', 'toulouse', 'strasbourg')
-    """
-    df = con.execute(requete).df()
-    st.dataframe(df)
-    st.bar_chart(df.set_index("NAME"))
+    # Brutes : Villes
+    st.markdown("**Données brutes des villes**")
+    df_cities = con.execute("SELECT * FROM DIM_CITY").df()
+    st.dataframe(df_cities, use_container_width=True)
 
-# 2️⃣ Nb de vélos disponibles en moyenne dans chaque station
-if st.sidebar.checkbox("Nb de vélos disponibles en moyenne par station"):
-    st.subheader("Nb de vélos disponibles en moyenne dans chaque station")
-    requete = """
-        SELECT ds.name, ds.code, ds.address, tmp.avg_dock_available
-        FROM DIM_STATION ds 
-        JOIN (
-            SELECT station_id, AVG(BICYCLE_AVAILABLE) AS avg_dock_available 
-            FROM FACT_STATION_STATEMENT 
-            GROUP BY station_id
-        ) AS tmp ON ds.id = tmp.station_id
-    """
-    df = con.execute(requete).df()
-    st.dataframe(df)
+    # Brutes : États
+    st.markdown("**Données brutes des états des stations**")
+    df_states = con.execute("SELECT * FROM FACT_STATION_STATEMENT").df()
+    st.dataframe(df_states, use_container_width=True)
 
-# 3️⃣ Taux d’occupation moyen des stations par ville
-if st.sidebar.checkbox("Taux d’occupation moyen des stations par ville"):
-    st.subheader("Taux d’occupation moyen des stations par ville")
-    requete = """
-        SELECT dc.name AS city_name,
-               ROUND(SUM(fss.BICYCLE_AVAILABLE) * 1.0 / SUM(ds.CAPACITTY), 3) AS avg_occupancy_rate
-        FROM FACT_STATION_STATEMENT fss
-        JOIN DIM_STATION ds ON fss.STATION_ID = ds.ID
-        JOIN DIM_CITY dc ON fss.CITY_ID = dc.ID
-        GROUP BY dc.name
-        ORDER BY avg_occupancy_rate DESC
-    """
-    df = con.execute(requete).df()
-    st.dataframe(df)
-    st.bar_chart(df.set_index("city_name"))
+# ----------------------------
+# 2️⃣ Carte interactive
+# ----------------------------
+st.subheader("🗺️ Carte interactive des stations de vélos (centrée sur Paris)")
 
-# 4️⃣ Évolution du nombre total de vélos disponibles par jour
-if st.sidebar.checkbox("Évolution du nombre total de vélos par jour"):
-    st.subheader("Évolution du nombre total de vélos disponibles par jour")
-    requete = """
-        SELECT CREATED_DATE,
-               SUM(BICYCLE_AVAILABLE) AS total_bicycles_available
+# Préparation des données de la carte
+query_map = """
+SELECT 
+    ds.NAME,
+    ds.LATITUDE,
+    ds.LONGITUDE,
+    fss.BICYCLE_AVAILABLE,
+    ds.CAPACITTY,
+    fss.CREATED_DATE
+FROM DIM_STATION ds
+JOIN FACT_STATION_STATEMENT fss ON ds.ID = fss.STATION_ID
+WHERE fss.CREATED_DATE = (
+    SELECT MAX(CREATED_DATE) FROM FACT_STATION_STATEMENT WHERE STATION_ID = ds.ID
+)
+AND ds.LATITUDE IS NOT NULL
+AND ds.LONGITUDE IS NOT NULL
+"""
+df_map = con.execute(query_map).df()
+
+if df_map.empty:
+    st.warning("Aucune donnée disponible pour la carte.")
+else:
+    fig = px.scatter_map(
+        df_map,
+        lat="LATITUDE",
+        lon="LONGITUDE",
+        hover_name="NAME",
+        hover_data=["BICYCLE_AVAILABLE", "CAPACITTY"],
+        color="BICYCLE_AVAILABLE",
+        size="BICYCLE_AVAILABLE",
+        color_continuous_scale=px.colors.cyclical.IceFire,
+        center=dict(lat=48.8566, lon=2.3522),  # Paris
+        size_max=15,
+        height=600,
+        zoom=11
+    )
+
+    st.plotly_chart(fig, use_container_width=True, height=600)
+
+st.markdown("---")
+
+# ----------------------------
+# 3️⃣ Indicateurs clés
+# ----------------------------
+st.subheader("📈 Indicateurs clés")
+
+# Indicateur 1
+st.markdown("**1. Nombre d'emplacements disponibles pour les vélos par ville**")
+query1 = """
+    SELECT dm.NAME, tmp.SUM_BICYCLE_DOCKS_AVAILABLE
+    FROM DIM_CITY dm
+    INNER JOIN (
+        SELECT CITY_ID, SUM(BICYCLE_DOCKS_AVAILABLE) AS SUM_BICYCLE_DOCKS_AVAILABLE
         FROM FACT_STATION_STATEMENT
-        GROUP BY CREATED_DATE
-        ORDER BY CREATED_DATE
-    """
-    df = con.execute(requete).df()
-    st.line_chart(df.rename(columns={"CREATED_DATE": "index"}).set_index("index"))
+        WHERE CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_STATION)
+        GROUP BY CITY_ID
+    ) tmp ON dm.ID = tmp.CITY_ID
+    WHERE lower(dm.NAME) IN ('paris','nantes','strasbourg','toulouse')
+"""
+df1 = con.execute(query1).df()
+st.dataframe(df1, use_container_width=True)
 
-# 5️⃣ Répartition des stations par statut
-if st.sidebar.checkbox("Répartition des stations par statut"):
-    st.subheader("Répartition des stations par statut")
-    requete = """
-        SELECT STATUS, COUNT(*) AS nb_stations
-        FROM DIM_STATION
-        GROUP BY STATUS
-    """
-    df = con.execute(requete).df()
-    st.dataframe(df)
-    st.bar_chart(df.set_index("STATUS"))
+# Indicateur 2
+st.markdown("**2. Moyenne des vélos disponibles par station**")
+query2 = """
+    SELECT ds.NAME, ds.CODE, ds.ADDRESS, tmp.AVG_DOCK_AVAILABLE
+    FROM DIM_STATION ds
+    JOIN (
+        SELECT STATION_ID, AVG(BICYCLE_AVAILABLE) AS AVG_DOCK_AVAILABLE
+        FROM FACT_STATION_STATEMENT
+        GROUP BY STATION_ID
+    ) tmp ON ds.ID = tmp.STATION_ID
+"""
+df2 = con.execute(query2).df()
+st.dataframe(df2, use_container_width=True)
 
-# 6️⃣ Capacité totale par ville
-if st.sidebar.checkbox("Capacité totale par ville"):
-    st.subheader("Capacité totale par ville")
-    requete = """
-        SELECT dc.name AS city_name,
-               SUM(ds.CAPACITTY) AS total_capacity
-        FROM DIM_STATION ds
-        JOIN FACT_STATION_STATEMENT fss ON ds.ID = fss.STATION_ID
-        JOIN DIM_CITY dc ON fss.CITY_ID = dc.ID
-        GROUP BY dc.name
-    """
-    df = con.execute(requete).df()
-    st.dataframe(df)
-    st.bar_chart(df.set_index("city_name"))
+# Indicateur 3
+st.markdown("**3. Capacité totale par ville**")
+query3 = """
+    SELECT dc.name AS city_name,
+           SUM(ds.CAPACITTY) AS total_capacity
+    FROM DIM_STATION ds
+    JOIN FACT_STATION_STATEMENT fss ON ds.ID = fss.STATION_ID
+    JOIN DIM_CITY dc ON fss.CITY_ID = dc.ID
+    GROUP BY dc.name
+"""
+df3 = con.execute(query3).df()
+st.dataframe(df3, use_container_width=True)
 
-# 7️⃣ Taux de disponibilité moyen des bornes par ville
-if st.sidebar.checkbox("Taux de disponibilité moyen des bornes par ville"):
-    st.subheader("Taux de disponibilité moyen des bornes par ville")
-    requete = """
-        SELECT dc.name AS city_name,
-               ROUND(SUM(fss.BICYCLE_DOCKS_AVAILABLE) * 1.0 / SUM(ds.CAPACITTY), 3) AS avg_dock_availability_rate
-        FROM FACT_STATION_STATEMENT fss
-        JOIN DIM_STATION ds ON fss.STATION_ID = ds.ID
-        JOIN DIM_CITY dc ON fss.CITY_ID = dc.ID
-        GROUP BY dc.name
-    """
-    df = con.execute(requete).df()
-    st.dataframe(df)
-    st.bar_chart(df.set_index("city_name"))
-
-# Fermeture connexion
+# Fermeture de la connexion
 con.close()
+
+st.caption("Données issues du data warehouse local DuckDB.")
