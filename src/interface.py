@@ -1,11 +1,24 @@
-import os
 import logging
 import streamlit as st
 import duckdb
 import plotly.express as px
 
+# On importe les fonctions du pipeline
+from data_ingestion import get_realtime_bicycle_data, get_commune_data
+from data_consolidation import (
+    create_consolidate_tables,
+    consolidate_city_data,
+    consolidate_station_data,
+)
+from data_agregation import (
+    create_agregate_tables,
+    agregate_dim_city,
+    agregate_dim_station,
+    agregate_fact_station_statements,
+)
+
 # ----------------------------
-# Configuration du logging
+# Setup logging
 # ----------------------------
 logging.basicConfig(
     level=logging.INFO,
@@ -15,7 +28,7 @@ logger = logging.getLogger(__name__)
 logger.info("Démarrage de l'application Streamlit.")
 
 # ----------------------------
-# Configuration de la page
+# Page config
 # ----------------------------
 st.set_page_config(
     page_title="Tableau de bord mobilité 🚲",
@@ -23,72 +36,118 @@ st.set_page_config(
 )
 
 # ----------------------------
-# Connexion DuckDB
+# Session state
 # ----------------------------
-con = duckdb.connect(
-    database="data/duckdb/mobility_analysis.duckdb",
-    read_only=True
-)
-logger.info("Connexion à DuckDB établie.")
+if "loaded" not in st.session_state:
+    st.session_state.loaded = False
 
 # ----------------------------
-# Titre et description
+# Title + Button
 # ----------------------------
 st.title("📊 Tableau de bord des stations de vélos 🚲")
-st.markdown("""
-Cette application présente :
-1. Les données brutes des indicateurs  
-2. Une carte interactive centrée sur Paris  
-3. Les indicateurs clés sous forme de tableaux  
-""")
+st.markdown("Cliquez sur **Alimenter et afficher** pour lancer le pipeline et visualiser les données.")
+
+if st.button("🔄 Alimenter et afficher"):
+    progress = st.progress(0)
+    step = 0
+    total_steps = 9  # nombre de sous-étapes du pipeline
+
+    try:
+        logger.info("1/9 – Ingestion: get_realtime_bicycle_data")
+        get_realtime_bicycle_data()
+        step += 1
+        progress.progress(int(step / total_steps * 100))
+
+        logger.info("2/9 – Ingestion: get_commune_data")
+        get_commune_data()
+        step += 1
+        progress.progress(int(step / total_steps * 100))
+
+        logger.info("3/9 – Consolidation: create_consolidate_tables")
+        create_consolidate_tables()
+        step += 1
+        progress.progress(int(step / total_steps * 100))
+
+        logger.info("4/9 – Consolidation: consolidate_city_data")
+        consolidate_city_data()
+        step += 1
+        progress.progress(int(step / total_steps * 100))
+
+        logger.info("5/9 – Consolidation: consolidate_station_data")
+        consolidate_station_data()
+        step += 1
+        progress.progress(int(step / total_steps * 100))
+
+        logger.info("6/9 – Agrégation: create_agregate_tables")
+        create_agregate_tables()
+        step += 1
+        progress.progress(int(step / total_steps * 100))
+
+        logger.info("7/9 – Agrégation: agregate_dim_city")
+        agregate_dim_city()
+        step += 1
+        progress.progress(int(step / total_steps * 100))
+
+        logger.info("8/9 – Agrégation: agregate_dim_station")
+        agregate_dim_station()
+        step += 1
+        progress.progress(int(step / total_steps * 100))
+
+        logger.info("9/9 – Agrégation: agregate_fact_station_statements")
+        agregate_fact_station_statements()
+        step += 1
+        progress.progress(int(step / total_steps * 100))
+
+        st.success("✅ Données alimentées et prêtes à l’affichage !")
+        st.session_state.loaded = True
+    except Exception as e:
+        logger.exception("Erreur pipeline")
+        st.error(f"❌ Échec du pipeline : {e}")
+        st.session_state.loaded = False
 
 # ----------------------------
-# 1️⃣ Données brutes
+# Affichage conditionnel
 # ----------------------------
-with st.expander("🔍 Voir les données brutes"):
-    # Brutes : Stations
-    st.markdown("**Données brutes des stations**")
-    df_stations = con.execute("SELECT * FROM DIM_STATION").df()
-    st.dataframe(df_stations, use_container_width=True)
+if st.session_state.loaded:
+    # Connexion DuckDB
+    con = duckdb.connect("data/duckdb/mobility_analysis.duckdb", read_only=True)
 
-    # Brutes : Villes
-    st.markdown("**Données brutes des villes**")
-    df_cities = con.execute("SELECT * FROM DIM_CITY").df()
-    st.dataframe(df_cities, use_container_width=True)
+    # 1️⃣ Données brutes
+    with st.expander("🔍 Voir les données brutes"):
+        st.markdown("**DIM_STATION**")
+        st.dataframe(con.execute("SELECT * FROM DIM_STATION").df(), use_container_width=True)
 
-    # Brutes : États
-    st.markdown("**Données brutes des états des stations**")
-    df_states = con.execute("SELECT * FROM FACT_STATION_STATEMENT").df()
-    st.dataframe(df_states, use_container_width=True)
+        st.markdown("**DIM_CITY**")
+        st.dataframe(con.execute("SELECT * FROM DIM_CITY").df(), use_container_width=True)
 
-# ----------------------------
-# 2️⃣ Carte interactive
-# ----------------------------
-st.subheader("🗺️ Carte interactive des stations de vélos (centrée sur Paris)")
+        st.markdown("**FACT_STATION_STATEMENT**")
+        st.dataframe(con.execute("SELECT * FROM FACT_STATION_STATEMENT").df(), use_container_width=True)
 
-# Préparation des données de la carte
-query_map = """
-SELECT 
-    ds.NAME,
-    ds.LATITUDE,
-    ds.LONGITUDE,
-    fss.BICYCLE_AVAILABLE,
-    ds.CAPACITTY,
-    fss.CREATED_DATE
-FROM DIM_STATION ds
-JOIN FACT_STATION_STATEMENT fss ON ds.ID = fss.STATION_ID
-WHERE fss.CREATED_DATE = (
-    SELECT MAX(CREATED_DATE) FROM FACT_STATION_STATEMENT WHERE STATION_ID = ds.ID
-)
-AND ds.LATITUDE IS NOT NULL
-AND ds.LONGITUDE IS NOT NULL
-"""
-df_map = con.execute(query_map).df()
-
-if df_map.empty:
-    st.warning("Aucune donnée disponible pour la carte.")
-else:
-    fig = px.scatter_map(
+    # 2️⃣ Carte interactive
+    st.subheader("🗺️ Carte interactive des stations (Paris)")
+    query_map = """
+    SELECT 
+        ds.NAME,
+        ds.LATITUDE,
+        ds.LONGITUDE,
+        fss.BICYCLE_AVAILABLE,
+        ds.CAPACITTY,
+        fss.CREATED_DATE
+    FROM DIM_STATION ds
+    JOIN FACT_STATION_STATEMENT fss ON ds.ID = fss.STATION_ID
+    WHERE fss.CREATED_DATE = (
+        SELECT MAX(CREATED_DATE)
+        FROM FACT_STATION_STATEMENT
+        WHERE STATION_ID = ds.ID
+    )
+    AND ds.LATITUDE IS NOT NULL
+    AND ds.LONGITUDE IS NOT NULL
+    """
+    df_map = con.execute(query_map).df()
+    if df_map.empty:
+        st.warning("Aucune donnée pour la carte.")
+    else:
+        fig = px.scatter_map(
         df_map,
         lat="LATITUDE",
         lon="LONGITUDE",
@@ -102,60 +161,51 @@ else:
         height=600,
         zoom=11
     )
+        st.plotly_chart(fig, use_container_width=True, height=600)
 
-    st.plotly_chart(fig, use_container_width=True, height=600)
+    st.markdown("---")
 
-st.markdown("---")
+    # 3️⃣ Indicateurs clés
+    st.subheader("📈 Indicateurs clés")
 
-# ----------------------------
-# 3️⃣ Indicateurs clés
-# ----------------------------
-st.subheader("📈 Indicateurs clés")
+    st.markdown("**1. Emplacements dispo par ville**")
+    q1 = """
+        SELECT dm.NAME, tmp.SUM_BICYCLE_DOCKS_AVAILABLE
+        FROM DIM_CITY dm
+        INNER JOIN (
+            SELECT CITY_ID, SUM(BICYCLE_DOCKS_AVAILABLE) AS SUM_BICYCLE_DOCKS_AVAILABLE
+            FROM FACT_STATION_STATEMENT
+            WHERE CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_STATION)
+            GROUP BY CITY_ID
+        ) tmp ON dm.ID = tmp.CITY_ID
+        WHERE lower(dm.NAME) IN ('paris','nantes','strasbourg','toulouse')
+    """
+    st.dataframe(con.execute(q1).df(), use_container_width=True)
 
-# Indicateur 1
-st.markdown("**1. Nombre d'emplacements disponibles pour les vélos par ville**")
-query1 = """
-    SELECT dm.NAME, tmp.SUM_BICYCLE_DOCKS_AVAILABLE
-    FROM DIM_CITY dm
-    INNER JOIN (
-        SELECT CITY_ID, SUM(BICYCLE_DOCKS_AVAILABLE) AS SUM_BICYCLE_DOCKS_AVAILABLE
-        FROM FACT_STATION_STATEMENT
-        WHERE CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_STATION)
-        GROUP BY CITY_ID
-    ) tmp ON dm.ID = tmp.CITY_ID
-    WHERE lower(dm.NAME) IN ('paris','nantes','strasbourg','toulouse')
-"""
-df1 = con.execute(query1).df()
-st.dataframe(df1, use_container_width=True)
+    st.markdown("**2. Moyenne vélos dispo par station**")
+    q2 = """
+        SELECT ds.NAME, ds.CODE, ds.ADDRESS, tmp.AVG_DOCK_AVAILABLE
+        FROM DIM_STATION ds
+        JOIN (
+            SELECT STATION_ID, AVG(BICYCLE_AVAILABLE) AS AVG_DOCK_AVAILABLE
+            FROM FACT_STATION_STATEMENT
+            GROUP BY STATION_ID
+        ) tmp ON ds.ID = tmp.STATION_ID
+    """
+    st.dataframe(con.execute(q2).df(), use_container_width=True)
 
-# Indicateur 2
-st.markdown("**2. Moyenne des vélos disponibles par station**")
-query2 = """
-    SELECT ds.NAME, ds.CODE, ds.ADDRESS, tmp.AVG_DOCK_AVAILABLE
-    FROM DIM_STATION ds
-    JOIN (
-        SELECT STATION_ID, AVG(BICYCLE_AVAILABLE) AS AVG_DOCK_AVAILABLE
-        FROM FACT_STATION_STATEMENT
-        GROUP BY STATION_ID
-    ) tmp ON ds.ID = tmp.STATION_ID
-"""
-df2 = con.execute(query2).df()
-st.dataframe(df2, use_container_width=True)
+    st.markdown("**3. Capacité totale par ville**")
+    q3 = """
+        SELECT dc.name AS city_name,
+               SUM(ds.CAPACITTY) AS total_capacity
+        FROM DIM_STATION ds
+        JOIN FACT_STATION_STATEMENT fss ON ds.ID = fss.STATION_ID
+        JOIN DIM_CITY dc ON fss.CITY_ID = dc.ID
+        GROUP BY dc.name
+    """
+    st.dataframe(con.execute(q3).df(), use_container_width=True)
 
-# Indicateur 3
-st.markdown("**3. Capacité totale par ville**")
-query3 = """
-    SELECT dc.name AS city_name,
-           SUM(ds.CAPACITTY) AS total_capacity
-    FROM DIM_STATION ds
-    JOIN FACT_STATION_STATEMENT fss ON ds.ID = fss.STATION_ID
-    JOIN DIM_CITY dc ON fss.CITY_ID = dc.ID
-    GROUP BY dc.name
-"""
-df3 = con.execute(query3).df()
-st.dataframe(df3, use_container_width=True)
-
-# Fermeture de la connexion
-con.close()
-
-st.caption("Données issues du data warehouse local DuckDB.")
+    con.close()
+    st.caption("Données issues du data warehouse local DuckDB.")
+else:
+    st.info("🔘 Cliquez sur **Alimenter et afficher** pour charger les données.")
