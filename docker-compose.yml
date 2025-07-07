@@ -1,55 +1,6 @@
 services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+  interface:
+    build:
+      context: .
     ports:
-      - "5432:5432"
-
-  airflow-webserver:
-    build: .
-    restart: always
-    depends_on:
-      - postgres
-      - airflow-init
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      AIRFLOW__WEBSERVER__SECRET_KEY: e5a3b7c9f1d64a92a7c0bfa8f236d47839a8c6d9a9f7d8a3b7c9f1d64a92a7c0
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./data:/opt/airflow/data
-      - ./src:/opt/airflow/src
-    ports:
-      - "8080:8080"
-    command: webserver
-
-  airflow-scheduler:
-    build: .
-    restart: always
-    depends_on:
-      - postgres
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      AIRFLOW__WEBSERVER__SECRET_KEY: e5a3b7c9f1d64a92a7c0bfa8f236d47839a8c6d9a9f7d8a3b7c9f1d64a92a7c0
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./data:/opt/airflow/data
-      - ./src:/opt/airflow/src
-    command: scheduler
-
-  airflow-init:
-    build: .
-    depends_on:
-      - postgres
-    environment:
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      AIRFLOW__WEBSERVER__SECRET_KEY: e5a3b7c9f1d64a92a7c0bfa8f236d47839a8c6d9a9f7d8a3b7c9f1d64a92a7c0
-    entrypoint: >
-      sh -c "airflow db init &&
-             airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com"
-    # Ce conteneur peut s'arrêter après l'initialisation
-
+      - "8501:8501"

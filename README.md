@@ -1,6 +1,6 @@
 ## 🚴 Sujet de travaux pratiques "Introduction à la data ingénierie 
 Ce projet consiste à construire un pipeline pour la collecte, la transformation et l'analyse des données des systèmes de vélos en libre-service de plusieurs villes françaises : Paris, Nantes, Toulouse et Strasbourg.  
-L'objectif est de consolider et aggréger ces données dans une base DuckDB pour permettre des analyses ultérieurs.
+L'objectif est de consolider et d'agréger ces données dans une base DuckDB pour permettre des analyses ultérieurs.
 
 ---
 
@@ -25,7 +25,7 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 │   └── sql_statements/       # Requêtes SQL réutilisables
 ├── src/                      # Code source principal
 │   ├── __init__.py           # Fichier d'initialisation du module
-│   ├── data_aggregation.py   # Agrégation des données
+│   ├── data_agregation.py   # Agrégation des données
 │   ├── data_consolidation.py # Consolidation des données brutes
 │   ├── data_ingestion.py     # Ingestion des données en temps réel
 │   ├── main.py               # Point d'entrée principal
@@ -45,7 +45,7 @@ L'objectif est de consolider et aggréger ces données dans une base DuckDB pour
 ### **1. Ingestion des données**
 **Objectif** : Récupérer des données brutes depuis des sources externes.
 #### Étapes : 
-Dans le fichier python `data_ingestion.py`
+Dans le fichier Python `data_ingestion.py`
 - **`get_realtime_bicycle_data`** : 
   - Récupère les données en temps réel sur les vélos disponibles des villes (Paris, Nantes, Toulouse, Strasbourg).
 - **`get_commune_data`** : 
@@ -60,7 +60,7 @@ Dans le fichier python `data_ingestion.py`
 **Objectif** : Organiser et structurer les données brutes pour préparer leur utilisation.
 
 #### Étapes :
-Dans le fichier python `data_consolidation.py`
+Dans le fichier Python `data_consolidation.py`
 - **`create_consolidate_tables`** :
   - Crée les tables nécessaires pour stocker les données consolidées.
 - **`consolidate_city_data`** :
@@ -78,7 +78,7 @@ Dans le fichier python `data_consolidation.py`
 **Objectif** : Synthétiser les données consolidées pour créer des vues ou métriques prêtes à l'analyse.
 
 #### Étapes :
-Dans le fichier python `data_agregation.py`
+Dans le fichier Python `data_agregation.py`
 - **`create_agregate_tables`** :
   - Crée les tables nécessaires pour stocker les données agrégées.
 - **`agregate_dim_city`** :
@@ -95,30 +95,34 @@ Dans le fichier python `data_agregation.py`
 
 ## 🚀 **Installation et Exécution**
 
-### **Sans Orchestration Airflow**
-
-1. **Cloner le dépôt :**  
+**Cloner le dépôt :**  
    ```bash
    git clone https://github.com/BrightMehou/etl-velo.git
    cd etl-velo
    ```
 
-2. **Installer Poetry :**  
+### **Exécution rapide sans passer par l'interface streamlit**
+
+1. **Installer Poetry :**  
    Si Poetry n'est pas encore installé : [Poetry](https://python-poetry.org/docs/)
 
-3. **Installer les dépendances :**  
+2. **Installer les dépendances :**  
    ```bash
    poetry install --no-root
    ```
 
-4. **Exécuter le script principal :**  
+3. **Exécuter le script principal :**  
    ```bash
    poetry run python src/main.py
    ```
 
+4. **Exécutez le script pour interroger les données consolidées :**  
+    ```bash
+    poetry run python src/query_duckdb.py
+    ```
 ---
 
-### **Avec Orchestration Airflow**
+### **Avec l'interface streamlit**
 
 1. **Installer Docker** : 
    Si Docker n'est pas encore installé : [Docker installation](https://www.docker.com/)
@@ -128,19 +132,15 @@ Dans le fichier python `data_agregation.py`
    docker-compose up -d
    ```
 
-3. **Accéder à l'interface Airflow :**  
-   Rendez-vous sur [http://localhost:8080](http://localhost:8080) et connectez-vous avec le nom d'utilisateur `admin` et le mot de passe `admin`.
+3. **Accéder à l'interface streamlit :**  
+   Rendez-vous sur [http://localhost:8501](http://localhost:8501) 
 
 ---
 
 ## 📊 **Analyse des données**
 
-Exécutez le script pour interroger les données consolidées :  
-```bash
-poetry run python src/query_duckdb.py
-```
 
-vous devez obtenir les résultats des requêtes suivantes
+Vous devriez obtenir les résultats des requêtes suivantes.
 
 #### 1. Nombre d'emplacements disponibles pour les vélos dans une ville :
 ```sql
@@ -165,7 +165,3 @@ JOIN (
     GROUP BY STATION_ID
 ) tmp ON ds.ID = tmp.STATION_ID;
 ```
-
-Vous pouvez également modifirer le fichier src/query_duckdb.py pour exécuter vos propres requêtes ou télécharger l'exécutable suivant sur le site de Duckdb.
-
-[Duckdb installation](https://duckdb.org/docs/installation/)

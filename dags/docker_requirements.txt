@@ -1,0 +1,4 @@
+duckdb
+requests
+sqlalchemy
+apache-airflow-providers-sqlite

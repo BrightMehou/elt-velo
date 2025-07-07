@@ -1,7 +1,20 @@
-FROM apache/airflow:2.11.0-python3.12
+FROM python:3.12-slim
 
-# Copier les fichiers du projet dans l'image Docker
-COPY docker_requirements.txt /docker_requirements.txt
-RUN pip install --no-cache-dir -r /docker_requirements.txt
 
-ENV PYTHONPATH="/opt/airflow/:${PYTHONPATH}"
+# Installer Poetry via pip
+RUN pip install poetry
+
+WORKDIR /app
+
+COPY pyproject.toml poetry.lock /app/
+RUN poetry install --no-root
+
+# Copy the source code into the container.
+COPY src/ /app/src/
+COPY data/ /app/data/
+
+# Expose the port that the application listens on.
+EXPOSE 8501
+
+# Run the application.
+CMD poetry run streamlit run src/interface.py   --server.port 8501 --server.address 0.0.0.0

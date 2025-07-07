@@ -49,60 +49,34 @@ st.markdown("Cliquez sur **Alimenter et afficher** pour lancer le pipeline et vi
 
 if st.button("🔄 Alimenter et afficher"):
     progress = st.progress(0)
+    
     step = 0
-    total_steps = 9  # nombre de sous-étapes du pipeline
 
+    steps = [
+        ("Ingestion: get_realtime_bicycle_data", get_realtime_bicycle_data),
+        ("Ingestion: get_commune_data", get_commune_data),
+        ("Consolidation: create_consolidate_tables", create_consolidate_tables),
+        ("Consolidation: consolidate_city_data", consolidate_city_data),
+        ("Consolidation: consolidate_station_data", consolidate_station_data),
+        ("Agrégation: create_agregate_tables", create_agregate_tables),
+        ("Agrégation: agregate_dim_city", agregate_dim_city),
+        ("Agrégation: agregate_dim_station", agregate_dim_station),
+        ("Agrégation: agregate_fact_station_statements", agregate_fact_station_statements),
+    ]
+    total_steps = 9
     try:
-        logger.info("1/9 – Ingestion: get_realtime_bicycle_data")
-        get_realtime_bicycle_data()
-        step += 1
-        progress.progress(int(step / total_steps * 100))
-
-        logger.info("2/9 – Ingestion: get_commune_data")
-        get_commune_data()
-        step += 1
-        progress.progress(int(step / total_steps * 100))
-
-        logger.info("3/9 – Consolidation: create_consolidate_tables")
-        create_consolidate_tables()
-        step += 1
-        progress.progress(int(step / total_steps * 100))
-
-        logger.info("4/9 – Consolidation: consolidate_city_data")
-        consolidate_city_data()
-        step += 1
-        progress.progress(int(step / total_steps * 100))
-
-        logger.info("5/9 – Consolidation: consolidate_station_data")
-        consolidate_station_data()
-        step += 1
-        progress.progress(int(step / total_steps * 100))
-
-        logger.info("6/9 – Agrégation: create_agregate_tables")
-        create_agregate_tables()
-        step += 1
-        progress.progress(int(step / total_steps * 100))
-
-        logger.info("7/9 – Agrégation: agregate_dim_city")
-        agregate_dim_city()
-        step += 1
-        progress.progress(int(step / total_steps * 100))
-
-        logger.info("8/9 – Agrégation: agregate_dim_station")
-        agregate_dim_station()
-        step += 1
-        progress.progress(int(step / total_steps * 100))
-
-        logger.info("9/9 – Agrégation: agregate_fact_station_statements")
-        agregate_fact_station_statements()
-        step += 1
-        progress.progress(int(step / total_steps * 100))
+        for index, (label, func) in enumerate(steps, start=1):
+            logger.info(f"{index}/{total_steps} – {label}")
+            func()
+            step += 1
+            progress.progress(int(step / total_steps * 100), text=label)
 
         st.success("✅ Données alimentées et prêtes à l’affichage !")
         st.session_state.loaded = True
+
     except Exception as e:
         logger.exception("Erreur pipeline")
-        st.error(f"❌ Échec du pipeline : {e}")
+        st.error(f"❌ Échec du pipeline à l'étape '{label}' : {e}")
         st.session_state.loaded = False
 
 # ----------------------------
@@ -124,7 +98,7 @@ if st.session_state.loaded:
         st.dataframe(con.execute("SELECT * FROM FACT_STATION_STATEMENT").df(), use_container_width=True)
 
     # 2️⃣ Carte interactive
-    st.subheader("🗺️ Carte interactive des stations (Paris)")
+    st.subheader("🗺️ Carte interactive des stations")
     query_map = """
     SELECT 
         ds.NAME,
@@ -206,6 +180,6 @@ if st.session_state.loaded:
     st.dataframe(con.execute(q3).df(), use_container_width=True)
 
     con.close()
-    st.caption("Données issues du data warehouse local DuckDB.")
+    st.caption("Données issues des API publiques des stations de vélos.")
 else:
     st.info("🔘 Cliquez sur **Alimenter et afficher** pour charger les données.")
