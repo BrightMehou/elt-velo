@@ -21,8 +21,7 @@ from data_agregation import (
 # Setup logging
 # ----------------------------
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 logger.info("Démarrage de l'application Streamlit.")
@@ -30,10 +29,7 @@ logger.info("Démarrage de l'application Streamlit.")
 # ----------------------------
 # Page config
 # ----------------------------
-st.set_page_config(
-    page_title="Tableau de bord mobilité 🚲",
-    layout="wide"
-)
+st.set_page_config(page_title="Tableau de bord mobilité 🚲", layout="wide")
 
 # ----------------------------
 # Session state
@@ -45,11 +41,13 @@ if "loaded" not in st.session_state:
 # Title + Button
 # ----------------------------
 st.title("📊 Tableau de bord des stations de vélos 🚲")
-st.markdown("Cliquez sur **Alimenter et afficher** pour lancer le pipeline et visualiser les données.")
+st.markdown(
+    "Cliquez sur **Alimenter et afficher** pour lancer le pipeline et visualiser les données."
+)
 
 if st.button("🔄 Alimenter et afficher"):
     progress = st.progress(0)
-    
+
     step = 0
 
     steps = [
@@ -61,7 +59,10 @@ if st.button("🔄 Alimenter et afficher"):
         ("Agrégation: create_agregate_tables", create_agregate_tables),
         ("Agrégation: agregate_dim_city", agregate_dim_city),
         ("Agrégation: agregate_dim_station", agregate_dim_station),
-        ("Agrégation: agregate_fact_station_statements", agregate_fact_station_statements),
+        (
+            "Agrégation: agregate_fact_station_statements",
+            agregate_fact_station_statements,
+        ),
     ]
     total_steps = 9
     try:
@@ -89,13 +90,20 @@ if st.session_state.loaded:
     # 1️⃣ Données brutes
     with st.expander("🔍 Voir les données brutes"):
         st.markdown("**DIM_STATION**")
-        st.dataframe(con.execute("SELECT * FROM DIM_STATION").df(), use_container_width=True)
+        st.dataframe(
+            con.execute("SELECT * FROM DIM_STATION").df(), use_container_width=True
+        )
 
         st.markdown("**DIM_CITY**")
-        st.dataframe(con.execute("SELECT * FROM DIM_CITY").df(), use_container_width=True)
+        st.dataframe(
+            con.execute("SELECT * FROM DIM_CITY").df(), use_container_width=True
+        )
 
         st.markdown("**FACT_STATION_STATEMENT**")
-        st.dataframe(con.execute("SELECT * FROM FACT_STATION_STATEMENT").df(), use_container_width=True)
+        st.dataframe(
+            con.execute("SELECT * FROM FACT_STATION_STATEMENT").df(),
+            use_container_width=True,
+        )
 
     # 2️⃣ Carte interactive
     st.subheader("🗺️ Carte interactive des stations")
@@ -122,19 +130,19 @@ if st.session_state.loaded:
         st.warning("Aucune donnée pour la carte.")
     else:
         fig = px.scatter_map(
-        df_map,
-        lat="LATITUDE",
-        lon="LONGITUDE",
-        hover_name="NAME",
-        hover_data=["BICYCLE_AVAILABLE", "CAPACITTY"],
-        color="BICYCLE_AVAILABLE",
-        size="BICYCLE_AVAILABLE",
-        color_continuous_scale=px.colors.cyclical.IceFire,
-        center=dict(lat=48.8566, lon=2.3522),  # Paris
-        size_max=15,
-        height=600,
-        zoom=11
-    )
+            df_map,
+            lat="LATITUDE",
+            lon="LONGITUDE",
+            hover_name="NAME",
+            hover_data=["BICYCLE_AVAILABLE", "CAPACITTY"],
+            color="BICYCLE_AVAILABLE",
+            size="BICYCLE_AVAILABLE",
+            color_continuous_scale=px.colors.cyclical.IceFire,
+            center=dict(lat=48.8566, lon=2.3522),  # Paris
+            size_max=15,
+            height=600,
+            zoom=11,
+        )
         st.plotly_chart(fig, use_container_width=True, height=600)
 
     st.markdown("---")

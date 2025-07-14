@@ -7,7 +7,7 @@ RUN pip install poetry
 WORKDIR /app
 
 COPY pyproject.toml poetry.lock /app/
-RUN poetry install --no-root
+RUN poetry install --no-root --without dev
 
 # Copy the source code into the container.
 COPY src/ /app/src/

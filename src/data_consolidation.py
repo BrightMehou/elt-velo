@@ -49,7 +49,7 @@ def paris_consolidate_station_data() -> None:
     con = duckdb.connect(database=duckdb_path, read_only=False)
 
     con.execute(
-    f"""
+        f"""
         create temp table Paris AS select * from read_json('data/raw_data/{today_date}/paris_realtime_bicycle_data.json');
 
         insert or replace into consolidate_station 
@@ -121,9 +121,9 @@ def nantes_toulouse_consolidate_station_data() -> None:
         con = duckdb.connect(database=duckdb_path, read_only=False)
 
         insse_code = get_city_code(city)  # Récupération du code INSEE de la ville
-    
+
         con.execute(
-        f"""
+            f"""
         create temp table {city} AS select * from read_json('data/raw_data/{today_date}/{city}_realtime_bicycle_data.json');
         insert or replace into consolidate_station 
         select
@@ -148,7 +148,8 @@ def nantes_toulouse_consolidate_station_data() -> None:
             last_update as last_statement_date,
             current_date() as created_date
         from {city};
-        """)
+        """
+        )
 
         con.close()
 
@@ -169,7 +170,7 @@ def strasbourg_consolidate_station_data() -> None:
     insse_code = get_city_code("strasbourg")
 
     con.execute(
-    f"""
+        f"""
     create temp table Strasbourg AS select * from read_json('data/raw_data/{today_date}/strasbourg_realtime_bicycle_data.json');
     insert or replace into consolidate_station
     select
@@ -194,7 +195,8 @@ def strasbourg_consolidate_station_data() -> None:
         to_timestamp(last_reported::int) as last_statement_date,
         current_date() as created_date
     from Strasbourg;
-    """)
+    """
+    )
 
 
 def consolidate_station_data() -> None:
@@ -221,12 +223,12 @@ def consolidate_city_data() -> None:
 
     con = duckdb.connect(database=duckdb_path, read_only=False)
 
-
-    con.execute(f"""INSERT OR REPLACE into consolidate_city
+    con.execute(
+        f"""INSERT OR REPLACE into consolidate_city
                     select 
                         code as id,
                         nom as name,
                         population as nb_inhabitants,
-                    now() as created_date
-                    from read_json('data/raw_data/{today_date}/commune_data.json')""") 
-
+                    current_date() as created_date
+                    from read_json('data/raw_data/{today_date}/commune_data.json')"""
+    )

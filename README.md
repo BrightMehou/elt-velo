@@ -95,44 +95,21 @@ Dans le fichier Python `data_agregation.py`
 
 ## 🚀 **Installation et Exécution**
 
-**Cloner le dépôt :**  
+1. **Cloner le dépôt :**  
    ```bash
    git clone https://github.com/BrightMehou/etl-velo.git
    cd etl-velo
    ```
 
-### **Exécution rapide sans passer par l'interface streamlit**
-
-1. **Installer Poetry :**  
-   Si Poetry n'est pas encore installé : [Poetry](https://python-poetry.org/docs/)
-
-2. **Installer les dépendances :**  
-   ```bash
-   poetry install --no-root
-   ```
-
-3. **Exécuter le script principal :**  
-   ```bash
-   poetry run python src/main.py
-   ```
-
-4. **Exécutez le script pour interroger les données consolidées :**  
-    ```bash
-    poetry run python src/query_duckdb.py
-    ```
----
-
-### **Avec l'interface streamlit**
-
-1. **Installer Docker** : 
+2. **Installer Docker** : 
    Si Docker n'est pas encore installé : [Docker installation](https://www.docker.com/)
 
-2. **Construire les images Docker et lancer les containeurs :**  
+3. **Construire les images Docker et lancer les containeurs :**  
    ```bash
    docker-compose up -d
    ```
 
-3. **Accéder à l'interface streamlit :**  
+4. **Accéder à l'interface streamlit :**  
    Rendez-vous sur [http://localhost:8501](http://localhost:8501) 
 
 ---

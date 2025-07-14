@@ -9,6 +9,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 today_date = datetime.now().strftime("%Y-%m-%d")
 
+
 def get_realtime_bicycle_data() -> None:
     """
     Récupération des données en temps réel des vélos en libre-service pour Paris, Nantes, Toulouse et Strasbourg.
@@ -70,8 +71,6 @@ def serialize_data(raw_json: str, file_name: str) -> None:
         raw_json (str): Les données brutes en format JSON sous forme de chaîne.
         file_name (str): Nom du fichier dans lequel les données seront sauvegardées.
     """
-
-
 
     if not os.path.exists(f"data/raw_data/{today_date}"):
         os.makedirs(f"data/raw_data/{today_date}")
