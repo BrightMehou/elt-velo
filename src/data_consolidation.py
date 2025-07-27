@@ -1,7 +1,7 @@
-from datetime import datetime
-import duckdb
 import logging
+from datetime import datetime
 
+import duckdb
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

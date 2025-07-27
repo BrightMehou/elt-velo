@@ -1,7 +1,8 @@
+import logging
 import os
 from datetime import datetime
+
 import requests
-import logging
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -55,7 +56,7 @@ def get_commune_data() -> None:
 
     if response.status_code == 200:
         serialize_data(response.text, "commune_data.json")
-        logger.info(f"Les données des communes ont été récuperées")
+        logger.info("Les données des communes ont été récuperées")
     else:
         logger.error(
             f"Error: Impossible de récuper les données des communes (status code: {response.status_code})"

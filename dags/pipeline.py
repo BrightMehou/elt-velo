@@ -1,23 +1,24 @@
+import logging
+from datetime import datetime, timedelta
+
 from airflow import DAG
 from airflow.decorators import task
-from datetime import datetime, timedelta
-import logging
 
-logger = logging.getLogger(__name__)
-# Import des fonctions de traitement des données
-from src.data_ingestion import get_realtime_bicycle_data, get_commune_data
-from src.data_consolidation import (
-    create_consolidate_tables,
-    consolidate_city_data,
-    consolidate_station_data,
-)
 from src.data_agregation import (
-    create_agregate_tables,
     agregate_dim_city,
     agregate_dim_station,
     agregate_fact_station_statements,
+    create_agregate_tables,
 )
+from src.data_consolidation import (
+    consolidate_city_data,
+    consolidate_station_data,
+    create_consolidate_tables,
+)
+from src.data_ingestion import get_commune_data, get_realtime_bicycle_data
 
+logger = logging.getLogger(__name__)
+# Import des fonctions de traitement des données
 # Configuration par défaut des tâches
 default_args = {
     "owner": "airflow",

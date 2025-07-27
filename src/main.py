@@ -1,17 +1,17 @@
 import logging
+
 from data_agregation import (
-    create_agregate_tables,
     agregate_dim_city,
     agregate_dim_station,
     agregate_fact_station_statements,
+    create_agregate_tables,
 )
 from data_consolidation import (
-    create_consolidate_tables,
     consolidate_city_data,
     consolidate_station_data,
+    create_consolidate_tables,
 )
-from data_ingestion import get_realtime_bicycle_data, get_commune_data
-
+from data_ingestion import get_commune_data, get_realtime_bicycle_data
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
