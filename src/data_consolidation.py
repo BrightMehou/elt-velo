@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import datetime
 
 import duckdb
@@ -9,6 +10,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 today_date = datetime.now().strftime("%Y-%m-%d")
 
+
 # Les code des villes
 PARIS_CITY_CODE = 1
 NANTES_CITY_CODE = 2
@@ -17,6 +19,20 @@ STRASBOURG_CITY_CODE = 4
 
 duckdb_path = "data/duckdb/mobility_analysis.duckdb"  # Chemin d'accès du fichier mobility_analysis.duckdb
 
+s3_endpoint = os.getenv("minio_endpoint", "localhost:9000")
+s3_access_key = os.getenv("minio_access_key", "minioadmin")
+s3_secret_key = os.getenv("minio_secret_key", "miniopassword")
+
+s3_statement = f"""
+INSTALL httpfs;
+LOAD httpfs;
+SET s3_url_style='path';
+SET s3_use_ssl='false';
+SET s3_endpoint='{s3_endpoint}';
+SET s3_access_key_id='{s3_access_key}';
+SET s3_secret_access_key='{s3_secret_key}';
+SET s3_region='us-east-1';
+"""
 
 def create_consolidate_tables() -> None:
     """
@@ -28,6 +44,7 @@ def create_consolidate_tables() -> None:
     """
 
     con = duckdb.connect(database=duckdb_path, read_only=False)
+
     with open("data/sql_statements/create_consolidate_tables.sql") as fd:
         statements = fd.read()
 
@@ -50,7 +67,8 @@ def paris_consolidate_station_data() -> None:
 
     con.execute(
         f"""
-        create temp table Paris AS select * from read_json('data/raw_data/{today_date}/paris_realtime_bicycle_data.json');
+        {s3_statement}
+        create temp table Paris AS select * from read_json('s3://bicycle-data/{today_date}/paris_realtime_bicycle_data.json');
 
         insert or replace into consolidate_station 
         select 
@@ -124,7 +142,8 @@ def nantes_toulouse_consolidate_station_data() -> None:
 
         con.execute(
             f"""
-        create temp table {city} AS select * from read_json('data/raw_data/{today_date}/{city}_realtime_bicycle_data.json');
+        {s3_statement}
+        create temp table {city} AS select * from read_json('s3://bicycle-data/{today_date}/{city}_realtime_bicycle_data.json');
         insert or replace into consolidate_station 
         select
                 {city_code} || '-' || number as id,
@@ -171,7 +190,8 @@ def strasbourg_consolidate_station_data() -> None:
 
     con.execute(
         f"""
-    create temp table Strasbourg AS select * from read_json('data/raw_data/{today_date}/strasbourg_realtime_bicycle_data.json');
+    {s3_statement}
+    create temp table Strasbourg AS select * from read_json('s3://bicycle-data/{today_date}/strasbourg_realtime_bicycle_data.json');
     insert or replace into consolidate_station
     select
         {STRASBOURG_CITY_CODE} || '-' || id as id,
@@ -220,15 +240,17 @@ def consolidate_city_data() -> None:
     Les données incluent des informations telles que l'identifiant INSEE, le nom de la commune
     et sa population.
     """
-
+    
     con = duckdb.connect(database=duckdb_path, read_only=False)
 
     con.execute(
-        f"""INSERT OR REPLACE into consolidate_city
+        f"""
+        {s3_statement}
+        INSERT OR REPLACE into consolidate_city
                     select 
                         code as id,
                         nom as name,
                         population as nb_inhabitants,
                     current_date() as created_date
-                    from read_json('data/raw_data/{today_date}/commune_data.json')"""
+                    from read_json('s3://bicycle-data/{today_date}/commune_data.json')"""
     )

@@ -1,6 +1,27 @@
 services:
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"    # API S3
+      - "9001:9001"    # Console web
+    volumes:
+      - minio_data:/data   # persistance des données
+    environment:
+      MINIO_ROOT_USER: minioadmin          # identifiant racine par défaut
+      MINIO_ROOT_PASSWORD: miniopassword  # mot de passe racine par défaut
+    command: server /data --console-address ":9001"
   interface:
     build:
       context: .
     ports:
       - "8501:8501"
+    environment:
+      - minio_endpoint=minio:9000
+      - minio_access_key=minioadmin
+      - minio_secret_key=miniopassword
+    depends_on:
+      - minio
+
+volumes:
+  minio_data:
+    driver: local

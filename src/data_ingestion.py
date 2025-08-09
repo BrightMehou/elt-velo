@@ -1,30 +1,41 @@
 import logging
-import os
 from datetime import datetime
-
+from io import BytesIO
+import os
 import requests
+from minio import Minio
 
+# Configuration du logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 today_date = datetime.now().strftime("%Y-%m-%d")
+BUCKET_NAME = "bicycle-data"
+
+minio_endpoint = os.getenv("minio_endpoint", "localhost:9000")
+minio_access_key = os.getenv("minio_access_key", "minioadmin")
+minio_secret_key = os.getenv("minio_secret_key", "miniopassword")
+
+# Connexion au service MinIO local
+minio_client = Minio(
+    endpoint=minio_endpoint,
+    access_key=minio_access_key,
+    secret_key=minio_secret_key,
+    secure=False
+)
+
+if not minio_client.bucket_exists(BUCKET_NAME):
+    minio_client.make_bucket(BUCKET_NAME)
+    logger.info(f"Bucket '{BUCKET_NAME}' créé.")
 
 
 def get_realtime_bicycle_data() -> None:
     """
-    Récupération des données en temps réel des vélos en libre-service pour Paris, Nantes, Toulouse et Strasbourg.
-
-    Cette fonction :
-    1. Télécharge les données en temps réel depuis les API ouvertes des quatre villes.
-    2. Sauvegarde les données JSON dans des fichiers locaux spécifiques pour chaque ville.
-    3. Affiche un message pour indiquer si les données ont été récupérées avec succès ou si une erreur s'est produite.
-
-    Les fichiers sont enregistrés dans un répertoire local au format : `nom_ville_realtime_bicycle_data.json`.
+    Récupère les données en temps réel des vélos pour Paris, Nantes, Toulouse et Strasbourg,
+    et les stocke directement dans MinIO au format JSON.
     """
-
-    # URLs des API pour les données des vélos en libre-service et noms de villes correspondant aux URLs
-
     urls = {
         "paris": "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/exports/json",
         "nantes": "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/exports/json",
@@ -33,48 +44,49 @@ def get_realtime_bicycle_data() -> None:
     }
 
     for city, url in urls.items():
-        response = requests.request("GET", url)
+        response = requests.get(url)
         if response.status_code == 200:
             serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
-            logger.info(f"Les données de {city} ont été récuperées")
+            logger.info(f"Les données de {city} ont été récupérées et envoyées à MinIO")
         else:
-            logger.error(
-                f"Error: Impossible de récuper les données de {city} (status code: {response.status_code})"
-            )
+            logger.error(f"Impossible de récupérer {city} (status: {response.status_code})")
 
 
 def get_commune_data() -> None:
     """
-    Récupère les données des communes françaises depuis l'API GeoAPI et
-    les sauvegarde sous forme de fichier JSON.
-
-    Les données sont sauvegardées dans le dossier : `data/raw_data/YYYY-MM-DD`.
+    Récupère les données des communes françaises et les stocke dans MinIO.
     """
     url = "https://geo.api.gouv.fr/communes"
-
-    response = requests.request("GET", url)
+    response = requests.get(url)
 
     if response.status_code == 200:
         serialize_data(response.text, "commune_data.json")
-        logger.info("Les données des communes ont été récuperées")
+        logger.info("Les données des communes ont été récupérées et envoyées à MinIO")
     else:
-        logger.error(
-            f"Error: Impossible de récuper les données des communes (status code: {response.status_code})"
-        )
+        logger.error(f"Impossible de récupérer les communes (status: {response.status_code})")
 
 
 def serialize_data(raw_json: str, file_name: str) -> None:
-    """
-    Sauvegarde les données brutes JSON dans un fichier sous le répertoire
-    `data/raw_data/YYYY-MM-DD`.
+    f"""
+    Envoie les données JSON dans MinIO dans le bucket {BUCKET_NAME}.
+    Structure du chemin : YYYY-MM-DD/nom_fichier.json
 
     Args:
         raw_json (str): Les données brutes en format JSON sous forme de chaîne.
         file_name (str): Nom du fichier dans lequel les données seront sauvegardées.
     """
+    # Conversion en octets  et création d'un "fichier" virtuel en mémoire à partir des octets
+    data_bytes = raw_json.encode("utf-8")
+    data_stream = BytesIO(data_bytes)
 
-    if not os.path.exists(f"data/raw_data/{today_date}"):
-        os.makedirs(f"data/raw_data/{today_date}")
+    object_key = f"{today_date}/{file_name}"
 
-    with open(f"data/raw_data/{today_date}/{file_name}", "w", encoding="utf-8") as fd:
-        fd.write(raw_json)
+    minio_client.put_object(
+        BUCKET_NAME,
+        object_key,
+        data_stream,
+        length=len(data_bytes),
+        content_type="application/json"
+    )
+
+    logger.info(f"Fichier envoyé dans MinIO : {BUCKET_NAME}/{object_key}")
