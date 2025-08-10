@@ -1,7 +1,8 @@
 import logging
+import os
 from datetime import datetime
 from io import BytesIO
-import os
+
 import requests
 from minio import Minio
 

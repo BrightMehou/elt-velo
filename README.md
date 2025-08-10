@@ -1,7 +1,7 @@
-## 🚴 Sujet de travaux pratiques "Introduction à la data ingénierie 
-Ce projet consiste à construire un pipeline pour la collecte, la transformation et l'analyse des données des systèmes de vélos en libre-service de plusieurs villes françaises : Paris, Nantes, Toulouse et Strasbourg.  
-L'objectif est de consolider et d'agréger ces données dans une base DuckDB pour permettre des analyses ultérieurs.
+## 🚴 ETL-Velo
 
+Ce projet propose la mise en place d’un pipeline simple pour collecter, transformer et analyser les données des systèmes de vélos en libre-service de Paris, Nantes, Toulouse et Strasbourg.
+Les données sont stockées dans MinIO (data lake), consolidées dans DuckDB (data warehouse), puis présentées via Streamlit pour faciliter l’exploration et la visualisation des résultats.
 ---
 
 ## 📥 **Sources des Données**
@@ -17,11 +17,8 @@ L'objectif est de consolider et d'agréger ces données dans une base DuckDB pou
 ## 🗂️ **Structure du Projet**
 
 ```plaintext
-├── dags/                     # Définitions des DAGs Airflow
-│   └── pipeline.py           # Orchestration du pipeline
 ├── data/                     # Données utilisées par les processus
 │   ├── duckdb/               # Base de données locale DuckDB
-│   ├── raw_data/             # Données brutes classées par date
 │   └── sql_statements/       # Requêtes SQL réutilisables
 ├── src/                      # Code source principal
 │   ├── __init__.py           # Fichier d'initialisation du module
@@ -29,10 +26,9 @@ L'objectif est de consolider et d'agréger ces données dans une base DuckDB pou
 │   ├── data_consolidation.py # Consolidation des données brutes
 │   ├── data_ingestion.py     # Ingestion des données en temps réel
 │   ├── main.py               # Point d'entrée principal
-│   └── query_duckdb.py       # Requêtes analytiques DuckDB
-├── Dockerfile                # Configuration Docker pour Airflow
+│   └── query_duckdb.py       # Requêtes analytiques DuckDB 
 ├── docker-compose.yml        # Orchestration Docker Compose
-├── docker_requirements.txt   # Dépendances Python spécifiques à Docker
+├── Dockerfile                # Configuration Docker
 ├── poetry.lock               # Verrouillage des dépendances Poetry
 ├── pyproject.toml            # Configuration du projet Poetry
 └── README.md                 # Documentation du projet
