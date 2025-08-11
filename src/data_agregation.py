@@ -9,25 +9,6 @@ logger = logging.getLogger(__name__)
 duckdb_path = "data/duckdb/mobility_analysis.duckdb"
 
 
-def create_agregate_tables() -> None:
-    """
-    Crée les tables définies dans un fichier SQL.
-
-    Les instructions SQL sont lues depuis un fichier `create_agregate_tables.sql`,
-    situé dans le répertoire `data/sql_statements`, et exécutées une par une
-    sur la base de données `mobility_analysis.duckdb`.
-    """
-
-    con = duckdb.connect(database=duckdb_path, read_only=False)
-    with open("data/sql_statements/create_agregate_tables.sql") as fd:
-        statements = fd.read()
-
-        # Exécution de chaque instruction SQL séparée par un ";"
-        for statement in statements.split(";"):
-            con.execute(statement)
-        logger.info("Agregate tables created if they didn't exist.")
-
-
 def agregate_dim_station() -> None:
     """
     Insère ou remplace les données dans la table DIM_STATION avec les informations
@@ -106,3 +87,13 @@ def agregate_fact_station_statements() -> None:
     """
 
     con.execute(sql_statement)
+
+
+def data_agregation() -> None:
+    """
+    Fonction principale pour agréger les données des stations de vélos et des villes.
+    Elle appelle les fonctions d'agrégation définies ci-dessus.
+    """
+    agregate_dim_station()
+    agregate_dim_city()
+    agregate_fact_station_statements()

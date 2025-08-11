@@ -4,20 +4,10 @@ import duckdb
 import plotly.express as px
 import streamlit as st
 
-from data_agregation import (
-    agregate_dim_city,
-    agregate_dim_station,
-    agregate_fact_station_statements,
-    create_agregate_tables,
-)
-from data_consolidation import (
-    consolidate_city_data,
-    consolidate_station_data,
-    create_consolidate_tables,
-)
-
-# On importe les fonctions du pipeline
-from data_ingestion import get_commune_data, get_realtime_bicycle_data
+from data_agregation import data_agregation
+from data_consolidation import data_consolidation
+from data_ingestion import data_ingestion
+from init_db import init_db
 
 # ----------------------------
 # Setup logging
@@ -53,20 +43,12 @@ if st.button("🔄 Alimenter et afficher"):
     step = 0
 
     steps = [
-        ("Ingestion: get_realtime_bicycle_data", get_realtime_bicycle_data),
-        ("Ingestion: get_commune_data", get_commune_data),
-        ("Consolidation: create_consolidate_tables", create_consolidate_tables),
-        ("Consolidation: consolidate_city_data", consolidate_city_data),
-        ("Consolidation: consolidate_station_data", consolidate_station_data),
-        ("Agrégation: create_agregate_tables", create_agregate_tables),
-        ("Agrégation: agregate_dim_city", agregate_dim_city),
-        ("Agrégation: agregate_dim_station", agregate_dim_station),
-        (
-            "Agrégation: agregate_fact_station_statements",
-            agregate_fact_station_statements,
-        ),
+        ("Initialisation de la base de données", init_db),
+        ("Ingestion des données", data_ingestion),
+        ("Consolidation des données", data_consolidation),
+        ("Agrégation des données", data_agregation),
     ]
-    total_steps = 9
+    total_steps = len(steps)
     try:
         for index, (label, func) in enumerate(steps, start=1):
             logger.info(f"{index}/{total_steps} – {label}")

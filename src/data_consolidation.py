@@ -17,7 +17,7 @@ NANTES_CITY_CODE = 2
 TOULOUSE_CITY_CODE = 3
 STRASBOURG_CITY_CODE = 4
 
-duckdb_path = "data/duckdb/mobility_analysis.duckdb"  # Chemin d'accès du fichier mobility_analysis.duckdb
+duckdb_path = "data/duckdb/mobility_analysis.duckdb"
 
 s3_endpoint = os.getenv("minio_endpoint", "localhost:9000")
 s3_access_key = os.getenv("minio_access_key", "minioadmin")
@@ -33,25 +33,6 @@ SET s3_access_key_id='{s3_access_key}';
 SET s3_secret_access_key='{s3_secret_key}';
 SET s3_region='us-east-1';
 """
-
-def create_consolidate_tables() -> None:
-    """
-    Crée les tables définies dans un fichier SQL.
-
-    Les instructions SQL sont lues depuis un fichier `create_agregate_tables.sql`,
-    situé dans le répertoire `data/sql_statements`, et exécutées une par une
-    sur la base de données `mobility_analysis.duckdb`.
-    """
-
-    con = duckdb.connect(database=duckdb_path, read_only=False)
-
-    with open("data/sql_statements/create_consolidate_tables.sql") as fd:
-        statements = fd.read()
-
-        # Exécution de chaque instruction SQL séparée par un ";"
-        for statement in statements.split(";"):
-            con.execute(statement)
-        logger.info("Consolidate tables created if they didn't exist.")
 
 
 def paris_consolidate_station_data() -> None:
@@ -240,7 +221,7 @@ def consolidate_city_data() -> None:
     Les données incluent des informations telles que l'identifiant INSEE, le nom de la commune
     et sa population.
     """
-    
+
     con = duckdb.connect(database=duckdb_path, read_only=False)
 
     con.execute(
@@ -254,3 +235,12 @@ def consolidate_city_data() -> None:
                     current_date() as created_date
                     from read_json('s3://bicycle-data/{today_date}/commune_data.json')"""
     )
+
+
+def data_consolidation() -> None:
+    """
+    Fonction principale pour consolider les données des stations de vélos et des communes.
+    Elle appelle les fonctions de consolidation définies ci-dessus.
+    """
+    consolidate_city_data()
+    consolidate_station_data()

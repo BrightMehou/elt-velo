@@ -24,7 +24,7 @@ minio_client = Minio(
     endpoint=minio_endpoint,
     access_key=minio_access_key,
     secret_key=minio_secret_key,
-    secure=False
+    secure=False,
 )
 
 if not minio_client.bucket_exists(BUCKET_NAME):
@@ -50,7 +50,9 @@ def get_realtime_bicycle_data() -> None:
             serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
             logger.info(f"Les données de {city} ont été récupérées et envoyées à MinIO")
         else:
-            logger.error(f"Impossible de récupérer {city} (status: {response.status_code})")
+            logger.error(
+                f"Impossible de récupérer {city} (status: {response.status_code})"
+            )
 
 
 def get_commune_data() -> None:
@@ -64,7 +66,9 @@ def get_commune_data() -> None:
         serialize_data(response.text, "commune_data.json")
         logger.info("Les données des communes ont été récupérées et envoyées à MinIO")
     else:
-        logger.error(f"Impossible de récupérer les communes (status: {response.status_code})")
+        logger.error(
+            f"Impossible de récupérer les communes (status: {response.status_code})"
+        )
 
 
 def serialize_data(raw_json: str, file_name: str) -> None:
@@ -87,7 +91,15 @@ def serialize_data(raw_json: str, file_name: str) -> None:
         object_key,
         data_stream,
         length=len(data_bytes),
-        content_type="application/json"
+        content_type="application/json",
     )
 
     logger.info(f"Fichier envoyé dans MinIO : {BUCKET_NAME}/{object_key}")
+
+
+def data_ingestion() -> None:
+    """
+    Fonction principale pour ingérer les données en temps réel des vélos et des communes.
+    """
+    get_realtime_bicycle_data()
+    get_commune_data()
