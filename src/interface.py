@@ -7,7 +7,6 @@ import streamlit as st
 from data_agregation import data_agregation
 from data_consolidation import data_consolidation
 from data_ingestion import data_ingestion
-from init_db import init_db
 
 # ----------------------------
 # Setup logging
@@ -43,7 +42,6 @@ if st.button("🔄 Alimenter et afficher"):
     step = 0
 
     steps = [
-        ("Initialisation de la base de données", init_db),
         ("Ingestion des données", data_ingestion),
         ("Consolidation des données", data_consolidation),
         ("Agrégation des données", data_agregation),

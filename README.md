@@ -18,14 +18,15 @@ Les données sont stockées dans MinIO (data lake), consolidées dans DuckDB (da
 
 ```plaintext
 ├── data/                     # Données utilisées par les processus
-│   ├── duckdb/               # Base de données locale DuckDB
-│   └── sql_statements/       # Requêtes SQL réutilisables
+│   └──  duckdb/              # Base de données locale DuckDB
 ├── src/                      # Code source principal
+│   ├──sql_statements/        # Requêtes SQL réutilisables
 │   ├── __init__.py           # Fichier d'initialisation du module
-│   ├── data_agregation.py   # Agrégation des données
+│   ├── data_agregation.py    # Agrégation des données
 │   ├── data_consolidation.py # Consolidation des données brutes
 │   ├── data_ingestion.py     # Ingestion des données en temps réel
-│   ├── main.py               # Point d'entrée principal
+│   ├── init_db.py            # Fichier d'init de la base de données
+│   ├── interface.py          # Interface utilisateur
 │   └── query_duckdb.py       # Requêtes analytiques DuckDB 
 ├── docker-compose.yml        # Orchestration Docker Compose
 ├── Dockerfile                # Configuration Docker

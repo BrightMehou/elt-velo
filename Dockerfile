@@ -17,4 +17,4 @@ COPY data/ /app/data/
 EXPOSE 8501
 
 # Run the application.
-CMD poetry run streamlit run src/interface.py   --server.port 8501 --server.address 0.0.0.0
+CMD poetry run python src/init_db.py && poetry run streamlit run src/interface.py   --server.port 8501 --server.address 0.0.0.0
