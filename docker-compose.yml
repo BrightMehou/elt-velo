@@ -10,7 +10,7 @@ services:
       MINIO_ROOT_USER: minioadmin          # identifiant racine par défaut
       MINIO_ROOT_PASSWORD: miniopassword  # mot de passe racine par défaut
     command: server /data --console-address ":9001"
-  interface:
+  ui:
     build:
       context: .
     ports:

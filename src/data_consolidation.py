@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime
 
-import duckdb
+from duckdb_tools import exec_sql_statments, get_city_code
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -16,8 +16,6 @@ PARIS_CITY_CODE = 1
 NANTES_CITY_CODE = 2
 TOULOUSE_CITY_CODE = 3
 STRASBOURG_CITY_CODE = 4
-
-duckdb_path = "data/duckdb/mobility_analysis.duckdb"
 
 s3_endpoint = os.getenv("minio_endpoint", "localhost:9000")
 s3_access_key = os.getenv("minio_access_key", "minioadmin")
@@ -34,213 +32,130 @@ SET s3_secret_access_key='{s3_secret_key}';
 SET s3_region='us-east-1';
 """
 
-
-def paris_consolidate_station_data() -> None:
-    """
-    Consolidation des données des stations de vélos à Paris.
-
-    Cette fonction :
-    1. Charge les données brutes des stations de vélos à Paris depuis un fichier JSON.
-    2. Transforme et nettoie les données pour les aligner avec le format attendu.
-    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION` de la base mobility_analysis.
-    """
-    con = duckdb.connect(database=duckdb_path, read_only=False)
-
-    con.execute(
-        f"""
+def consolidate_city_data():
+    """Consolide les données des communes."""
+    city_data_sql_statement = f"""
         {s3_statement}
-        create temp table Paris AS select * from read_json('s3://bicycle-data/{today_date}/paris_realtime_bicycle_data.json');
+        INSERT OR REPLACE into consolidate_city
+        select 
+            code as id,
+            nom as name,
+            population as nb_inhabitants,
+            current_date() as created_date
+        from read_json('s3://bicycle-data/{today_date}/commune_data.json')
+    """
+    exec_sql_statments(city_data_sql_statement)
+
+
+def consolidate_paris_data():
+    """Consolide les données de Paris."""
+    paris_sql_statement = f"""
+        {s3_statement}
+        create temp table Paris AS 
+            select * from read_json('s3://bicycle-data/{today_date}/paris_realtime_bicycle_data.json');
 
         insert or replace into consolidate_station 
         select 
-              {PARIS_CITY_CODE} || '-' || stationcode as id,
-              stationcode AS code,
-              name,
-              nom_arrondissement_communes as city_name,
-              code_insee_commune as city_code,
-              Null as address,
-              coordonnees_geo.lon as longitude,
-              coordonnees_geo.lat as latitude,
-              is_installed as status,
-              current_date() as created_date,
-              capacity
-              from paris;
+            {PARIS_CITY_CODE} || '-' || stationcode as id,
+            stationcode AS code,
+            name,
+            nom_arrondissement_communes as city_name,
+            code_insee_commune as city_code,
+            null as address,
+            coordonnees_geo.lon as longitude,
+            coordonnees_geo.lat as latitude,
+            is_installed as status,
+            current_date() as created_date,
+            capacity
+        from Paris;
 
         insert or replace into CONSOLIDATE_STATION_STATEMENT
         select 
-                {PARIS_CITY_CODE} || '-' || stationcode as station_id,
-                numdocksavailable AS bicycle_docks_available,
-                numbikesavailable AS bicycle_available,
-                duedate as last_statement_date,
-                current_date() as created_date,
+            {PARIS_CITY_CODE} || '-' || stationcode as station_id,
+            numdocksavailable AS bicycle_docks_available,
+            numbikesavailable AS bicycle_available,
+            duedate as last_statement_date,
+            current_date() as created_date
         from Paris;
     """
-    )
+    exec_sql_statments(paris_sql_statement)
 
 
-def get_city_code(name: str) -> str:
-    """
-    Récupère le code d'une ville depuis la table `CONSOLIDATE_CITY` en fonction de son nom.
-
-    Args:
-        name (str): Nom de la ville (non sensible à la casse).
-
-    Returns:
-        str: Code de la ville correspondante.
-
-    Note:
-        - Le code est extrait des données les plus récentes (basées sur la colonne `CREATED_DATE`).
-    """
-
-    con = duckdb.connect(database=duckdb_path, read_only=False)
-
-    requete = f"""SELECT ID FROM CONSOLIDATE_CITY 
-             WHERE lower(NAME) = '{name}'
-             AND CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_CITY)"""
-    code = con.sql(requete).fetchall()[0][0]
-
-    return code
-
-
-def nantes_toulouse_consolidate_station_data() -> None:
-    """
-    Consolide les données des stations de vélos en libre-service pour Nantes et Toulouse.
-
-    Cette fonction :
-    1. Charge les données brutes pour chaque ville depuis des fichiers JSON.
-    2. Transforme et nettoie les données pour les aligner avec le format attendu.
-    3. Ajoute ou met à jour les données consolidées des stations dans la table `CONSOLIDATE_STATION` de la base mobility_analysis
-    """
-
-    # Liste des villes et de leurs codes correspondants
+def consolidate_nantes_toulouse():
+    """Consolide les données pour Nantes et Toulouse."""
     cities = ["nantes", "toulouse"]
     cities_code = [NANTES_CITY_CODE, TOULOUSE_CITY_CODE]
 
     for city, city_code in zip(cities, cities_code):
-        con = duckdb.connect(database=duckdb_path, read_only=False)
+        sql_statement = f"""
+            {s3_statement}
+            create temp table {city} AS 
+                select * from read_json('s3://bicycle-data/{today_date}/{city}_realtime_bicycle_data.json');
 
-        insse_code = get_city_code(city)  # Récupération du code INSEE de la ville
-
-        con.execute(
-            f"""
-        {s3_statement}
-        create temp table {city} AS select * from read_json('s3://bicycle-data/{today_date}/{city}_realtime_bicycle_data.json');
-        insert or replace into consolidate_station 
-        select
+            insert or replace into consolidate_station 
+            select
                 {city_code} || '-' || number as id,
                 number as code,
                 name,
                 contract_name as city_name,
-                {insse_code} as city_code,
+                {get_city_code(city)} as city_code,
                 address,
                 position.lon as longitude,
                 position.lat as latitude,
                 status,
                 current_date() as created_date,
-                bike_stands as capacity,
-        from {city};
+                bike_stands as capacity
+            from {city};
 
-        INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT
-        select
-            {city_code} || '-' || number as station_id,
-            available_bike_stands as bicycle_docks_available,
-            available_bikes as bicycle_available,
-            last_update as last_statement_date,
-            current_date() as created_date
-        from {city};
+            insert or replace into CONSOLIDATE_STATION_STATEMENT
+            select
+                {city_code} || '-' || number as station_id,
+                available_bike_stands as bicycle_docks_available,
+                available_bikes as bicycle_available,
+                last_update as last_statement_date,
+                current_date() as created_date
+            from {city};
         """
-        )
-
-        con.close()
+        exec_sql_statments(sql_statement)
 
 
-def strasbourg_consolidate_station_data() -> None:
-    """
-    Consolidation des données des stations de vélos à Strasbourg.
-
-    Cette fonction :
-    1. Charge les données brutes des stations de vélos à Strasbourg depuis un fichier JSON.
-    2. Transforme et nettoie les données pour les aligner avec le format attendu.
-    3. Insère ou remplace ces données dans la table `CONSOLIDATE_STATION` de la base mobility_analysis.
-    """
-
-    con = duckdb.connect(database=duckdb_path, read_only=False)
-    # Le nom de la ville n'existe pas dans les données brute. Il faut donc l'encodé en dure dans le code
-
-    insse_code = get_city_code("strasbourg")
-
-    con.execute(
-        f"""
-    {s3_statement}
-    create temp table Strasbourg AS select * from read_json('s3://bicycle-data/{today_date}/strasbourg_realtime_bicycle_data.json');
-    insert or replace into consolidate_station
-    select
-        {STRASBOURG_CITY_CODE} || '-' || id as id,
-        id as code,
-        na as name,
-        'strasbourg' as city_name,
-        {insse_code} as city_code,
-        null as address,
-        lon as longitude,
-        lat as latitude,
-        is_installed as status,
-        current_date() as created_date,
-        "to" as capacity
-    from Strasbourg;
-
-    INSERT OR REPLACE INTO CONSOLIDATE_STATION_STATEMENT 
-    select
-        {STRASBOURG_CITY_CODE} || '-' || id as station_id,
-        num_docks_available as bicycle_docks_available,
-        av as bicycle_available,
-        to_timestamp(last_reported::int) as last_statement_date,
-        current_date() as created_date
-    from Strasbourg;
-    """
-    )
-
-
-def consolidate_station_data() -> None:
-
-    paris_consolidate_station_data()
-
-    nantes_toulouse_consolidate_station_data()
-
-    strasbourg_consolidate_station_data()
-
-
-def consolidate_city_data() -> None:
-    """
-    Consolidation des données des communes.
-
-    Cette fonction :
-    1. Charge les données brutes des communes depuis un fichier JSON.
-    2. Transforme et nettoie les données pour les aligner avec le format attendu.
-    3. Insère ou remplace ces données dans la table `CONSOLIDATE_CITY` de la base mobility_analysis.
-
-    Les données incluent des informations telles que l'identifiant INSEE, le nom de la commune
-    et sa population.
-    """
-
-    con = duckdb.connect(database=duckdb_path, read_only=False)
-
-    con.execute(
-        f"""
+def consolidate_strasbourg_data():
+    """Consolide les données de Strasbourg."""
+    strasbourg_sql_statement = f"""
         {s3_statement}
-        INSERT OR REPLACE into consolidate_city
-                    select 
-                        code as id,
-                        nom as name,
-                        population as nb_inhabitants,
-                    current_date() as created_date
-                    from read_json('s3://bicycle-data/{today_date}/commune_data.json')"""
-    )
+        create temp table Strasbourg AS 
+            select * from read_json('s3://bicycle-data/{today_date}/strasbourg_realtime_bicycle_data.json');
+
+        insert or replace into consolidate_station
+        select
+            {STRASBOURG_CITY_CODE} || '-' || id as id,
+            id as code,
+            na as name,
+            'strasbourg' as city_name,
+            {get_city_code("strasbourg")} as city_code,
+            null as address,
+            lon as longitude,
+            lat as latitude,
+            is_installed as status,
+            current_date() as created_date,
+            "to" as capacity
+        from Strasbourg;
+
+        insert or replace into CONSOLIDATE_STATION_STATEMENT 
+        select
+            {STRASBOURG_CITY_CODE} || '-' || id as station_id,
+            num_docks_available as bicycle_docks_available,
+            av as bicycle_available,
+            to_timestamp(last_reported::int) as last_statement_date,
+            current_date() as created_date
+        from Strasbourg;
+    """
+    exec_sql_statments(strasbourg_sql_statement)
 
 
 def data_consolidation() -> None:
-    """
-    Fonction principale pour consolider les données des stations de vélos et des communes.
-    Elle appelle les fonctions de consolidation définies ci-dessus.
-    """
+    """Orchestre la consolidation des données de toutes les villes."""
     consolidate_city_data()
-    consolidate_station_data()
+    consolidate_paris_data()
+    consolidate_nantes_toulouse()
+    consolidate_strasbourg_data()

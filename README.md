@@ -21,7 +21,6 @@ Les données sont stockées dans MinIO (data lake), consolidées dans DuckDB (da
 │   └──  duckdb/              # Base de données locale DuckDB
 ├── src/                      # Code source principal
 │   ├──sql_statements/        # Requêtes SQL réutilisables
-│   ├── __init__.py           # Fichier d'initialisation du module
 │   ├── data_agregation.py    # Agrégation des données
 │   ├── data_consolidation.py # Consolidation des données brutes
 │   ├── data_ingestion.py     # Ingestion des données en temps réel
@@ -58,8 +57,6 @@ Dans le fichier Python `data_ingestion.py`
 
 #### Étapes :
 Dans le fichier Python `data_consolidation.py`
-- **`create_consolidate_tables`** :
-  - Crée les tables nécessaires pour stocker les données consolidées.
 - **`consolidate_city_data`** :
   - Structure et nettoie les données des communes pour les préparer à l'analyse.
 - **`consolidate_station_data`** :
@@ -76,8 +73,6 @@ Dans le fichier Python `data_consolidation.py`
 
 #### Étapes :
 Dans le fichier Python `data_agregation.py`
-- **`create_agregate_tables`** :
-  - Crée les tables nécessaires pour stocker les données agrégées.
 - **`agregate_dim_city`** :
   - Met à jour la table dimensionnelle des villes (**DIM_CITY**) avec les données les plus récentes, telles que le nombre d’habitants.
 - **`agregate_dim_station`** :
