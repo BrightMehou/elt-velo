@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 duckdb_path = "data/duckdb/mobility_analysis.duckdb"
 
+
 def exec_sql_from_file(file_name: str, log_message: str) -> None:
     """
     Crée les tables définies dans un fichier SQL.
@@ -28,7 +29,6 @@ def exec_sql_from_file(file_name: str, log_message: str) -> None:
 
 
 def exec_sql_statments(sql_statments: str) -> None:
-
     """
     Exécute les instructions SQL fournies.
 
@@ -36,7 +36,7 @@ def exec_sql_statments(sql_statments: str) -> None:
     directement dans la base de données `mobility_analysis.duckdb`.
     """
     con = duckdb.connect(database=duckdb_path, read_only=False)
-    
+
     for statement in sql_statments.split(";"):
         con.execute(statement)
 

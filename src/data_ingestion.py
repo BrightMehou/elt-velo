@@ -48,7 +48,6 @@ def get_realtime_bicycle_data() -> None:
         response = requests.get(url)
         if response.status_code == 200:
             serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
-            logger.info(f"Les données de {city} ont été récupérées et envoyées à MinIO")
         else:
             logger.error(
                 f"Impossible de récupérer {city} (status: {response.status_code})"

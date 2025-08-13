@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime
 
-from duckdb_tools import exec_sql_statments, get_city_code
+from duckdb_tools import exec_sql_from_file, exec_sql_statments, get_city_code
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -31,6 +31,7 @@ SET s3_access_key_id='{s3_access_key}';
 SET s3_secret_access_key='{s3_secret_key}';
 SET s3_region='us-east-1';
 """
+
 
 def consolidate_city_data():
     """Consolide les données des communes."""
@@ -159,3 +160,7 @@ def data_consolidation() -> None:
     consolidate_paris_data()
     consolidate_nantes_toulouse()
     consolidate_strasbourg_data()
+
+
+def data_agregation() -> None:
+    exec_sql_from_file("alim_agregate_tables.sql", "Agrégation des tables.")

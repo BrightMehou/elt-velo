@@ -18,20 +18,20 @@ Les données sont stockées dans MinIO (data lake), consolidées dans DuckDB (da
 
 ```plaintext
 ├── data/                     # Données utilisées par les processus
-│   └──  duckdb/              # Base de données locale DuckDB
+│   └── duckdb/                # Base de données locale DuckDB
 ├── src/                      # Code source principal
-│   ├──sql_statements/        # Requêtes SQL réutilisables
-│   ├── data_agregation.py    # Agrégation des données
-│   ├── data_consolidation.py # Consolidation des données brutes
-│   ├── data_ingestion.py     # Ingestion des données en temps réel
-│   ├── init_db.py            # Fichier d'init de la base de données
-│   ├── interface.py          # Interface utilisateur
-│   └── query_duckdb.py       # Requêtes analytiques DuckDB 
-├── docker-compose.yml        # Orchestration Docker Compose
-├── Dockerfile                # Configuration Docker
-├── poetry.lock               # Verrouillage des dépendances Poetry
-├── pyproject.toml            # Configuration du projet Poetry
-└── README.md                 # Documentation du projet
+│   ├── sql_statements/        # Requêtes SQL réutilisables
+│   ├── data_agregation.py     # Agrégation des données
+│   ├── data_consolidation.py  # Consolidation des données brutes
+│   ├── data_ingestion.py      # Ingestion des données en temps réel
+│   ├── duckdb_tools.py        # Utilitaires d'interaction avec DuckDB
+│   ├── init_db.py             # Fichier d'initialisation de la base de données
+│   └── ui.py                  # Interface utilisateur
+├── docker-compose.yml         # Orchestration Docker Compose
+├── Dockerfile                 # Configuration Docker
+├── poetry.lock                # Verrouillage des dépendances Poetry
+├── pyproject.toml             # Configuration du projet Poetry
+└── README.md                  # Documentation du projet
 ```
 
 ---
