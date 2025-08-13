@@ -17,13 +17,12 @@ Les données sont stockées dans MinIO (data lake), consolidées dans DuckDB (da
 ## 🗂️ **Structure du Projet**
 
 ```plaintext
-├── data/                     # Données utilisées par les processus
+├── data/                      # Données utilisées par les processus
 │   └── duckdb/                # Base de données locale DuckDB
-├── src/                      # Code source principal
+├── src/                       # Code source principal
 │   ├── sql_statements/        # Requêtes SQL réutilisables
-│   ├── data_agregation.py     # Agrégation des données
-│   ├── data_consolidation.py  # Consolidation des données brutes
 │   ├── data_ingestion.py      # Ingestion des données en temps réel
+│   ├── data_transformation.py # Transformation des données brutes
 │   ├── duckdb_tools.py        # Utilitaires d'interaction avec DuckDB
 │   ├── init_db.py             # Fichier d'initialisation de la base de données
 │   └── ui.py                  # Interface utilisateur
@@ -56,7 +55,7 @@ Dans le fichier Python `data_ingestion.py`
 **Objectif** : Organiser et structurer les données brutes pour préparer leur utilisation.
 
 #### Étapes :
-Dans le fichier Python `data_consolidation.py`
+Dans le fichier Python `data_transformation.py`
 - **`consolidate_city_data`** :
   - Structure et nettoie les données des communes pour les préparer à l'analyse.
 - **`consolidate_station_data`** :
@@ -72,12 +71,9 @@ Dans le fichier Python `data_consolidation.py`
 **Objectif** : Synthétiser les données consolidées pour créer des vues ou métriques prêtes à l'analyse.
 
 #### Étapes :
-Dans le fichier Python `data_agregation.py`
-- **`agregate_dim_city`** :
-  - Met à jour la table dimensionnelle des villes (**DIM_CITY**) avec les données les plus récentes, telles que le nombre d’habitants.
-- **`agregate_dim_station`** :
-  - Met à jour la table dimensionnelle des stations (**DIM_STATION**) avec les informations consolidées les plus récentes.
-- **`agregate_fact_station_statements`** :
+Dans le fichier Python `data_transformation.py`
+- **`data_agregation`** :
+  - Met à jour les tables dimensionnelle des villes (**DIM_CITY**), des stations (**DIM_STATION**) avec les données les plus récentes, 
   - Met à jour la table factuelle des états des stations (**FACT_STATION_STATEMENT**) en associant les informations des stations et des villes.
 
 #### Produits :
