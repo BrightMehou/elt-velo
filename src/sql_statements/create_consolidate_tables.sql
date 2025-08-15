@@ -1,31 +1,31 @@
-CREATE TABLE IF NOT EXISTS CONSOLIDATE_STATION  (
-    ID VARCHAR NOT NULL,
-    CODE VARCHAR NOT NULL,
-    NAME VARCHAR,
-    CITY_NAME VARCHAR,
-    CITY_CODE VARCHAR,
-    ADDRESS VARCHAR,
-    LONGITUDE FLOAT,
-    LATITUDE FLOAT,
-    STATUS VARCHAR,
-    CREATED_DATE DATE,
-    CAPACITTY INTEGER,
-    PRIMARY KEY (ID, CREATED_DATE)
+create table if not exists consolidate_station  (
+    id varchar not null,
+    code varchar not null,
+    name varchar,
+    city_name varchar,
+    city_code varchar,
+    address varchar,
+    longitude float,
+    latitude float,
+    status varchar,
+    created_date date,
+    capacitty integer,
+    primary key (id, created_date)
 );
 
-CREATE TABLE IF NOT EXISTS CONSOLIDATE_CITY (
-    ID VARCHAR,
-    NAME VARCHAR,
-    NB_INHABITANTS INTEGER,
-    CREATED_DATE VARCHAR,
-    PRIMARY KEY (ID, CREATED_DATE)
+create table if not exists consolidate_city (
+    id varchar,
+    name varchar,
+    nb_inhabitants integer,
+    created_date varchar,
+    primary key (id, created_date)
 );
 
-CREATE TABLE IF NOT EXISTS CONSOLIDATE_STATION_STATEMENT (
-    STATION_ID VARCHAR NOT NULL,
-    BICYCLE_DOCKS_AVAILABLE INTEGER,
-    BICYCLE_AVAILABLE INTEGER,
-    LAST_STATEMENT_DATE DATE,
-    CREATED_DATE VARCHAR,
-    PRIMARY KEY (STATION_ID, CREATED_DATE)
+create table if not exists consolidate_station_statement (
+    station_id varchar not null,
+    bicycle_docks_available integer,
+    bicycle_available integer,
+    last_statement_date date,
+    created_date varchar,
+    primary key (station_id, created_date)
 );

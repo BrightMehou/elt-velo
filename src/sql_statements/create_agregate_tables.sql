@@ -1,28 +1,28 @@
-CREATE TABLE IF NOT EXISTS DIM_STATION (
-    ID VARCHAR PRIMARY KEY,
-    CODE VARCHAR,
-    NAME VARCHAR,
-    ADDRESS VARCHAR,
-    LONGITUDE FLOAT,
-    LATITUDE FLOAT,
-    STATUS VARCHAR,
-    CAPACITTY INTEGER
+create table if not exists dim_station (
+    id varchar primary key,
+    code varchar,
+    name varchar,
+    address varchar,
+    longitude float,
+    latitude float,
+    status varchar,
+    capacitty integer
 );
 
-CREATE TABLE IF NOT EXISTS DIM_CITY (
-    ID VARCHAR PRIMARY KEY,
-    NAME VARCHAR,
-    NB_INHABITANTS INTEGER
+create table if not exists dim_city (
+    id varchar primary key,
+    name varchar,
+    nb_inhabitants integer
 );
 
-CREATE TABLE IF NOT EXISTS FACT_STATION_STATEMENT (
-    STATION_ID VARCHAR NOT NULL,
-    CITY_ID VARCHAR NOT NULL,
-    BICYCLE_DOCKS_AVAILABLE INTEGER,
-    BICYCLE_AVAILABLE INTEGER,
-    LAST_STATEMENT_DATE DATETIME,
-    CREATED_DATE DATE DEFAULT current_date,
-    PRIMARY KEY (STATION_ID, CITY_ID, CREATED_DATE),
-    FOREIGN KEY (STATION_ID) REFERENCES DIM_STATION (ID),
-    FOREIGN KEY (CITY_ID) REFERENCES DIM_CITY (ID)
+create table if not exists fact_station_statement (
+    station_id varchar not null,
+    city_id varchar not null,
+    bicycle_docks_available integer,
+    bicycle_available integer,
+    last_statement_date datetime,
+    created_date date default current_date,
+    primary key (station_id, city_id, created_date),
+    foreign key (station_id) references dim_station (id),
+    foreign key (city_id) references dim_city (id)
 );

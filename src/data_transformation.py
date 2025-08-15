@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import datetime
 
 from duckdb_tools import exec_sql_from_file, exec_sql_statments, get_city_code
@@ -17,27 +16,12 @@ NANTES_CITY_CODE = 2
 TOULOUSE_CITY_CODE = 3
 STRASBOURG_CITY_CODE = 4
 
-s3_endpoint = os.getenv("minio_endpoint", "localhost:9000")
-s3_access_key = os.getenv("minio_access_key", "minioadmin")
-s3_secret_key = os.getenv("minio_secret_key", "miniopassword")
-
-s3_statement = f"""
-INSTALL httpfs;
-LOAD httpfs;
-SET s3_url_style='path';
-SET s3_use_ssl='false';
-SET s3_endpoint='{s3_endpoint}';
-SET s3_access_key_id='{s3_access_key}';
-SET s3_secret_access_key='{s3_secret_key}';
-SET s3_region='us-east-1';
-"""
-
 
 def consolidate_city_data():
     """Consolide les données des communes."""
+
     city_data_sql_statement = f"""
-        {s3_statement}
-        INSERT OR REPLACE into consolidate_city
+        insert or replace into consolidate_city
         select 
             code as id,
             nom as name,
@@ -45,20 +29,19 @@ def consolidate_city_data():
             current_date() as created_date
         from read_json('s3://bicycle-data/{today_date}/commune_data.json')
     """
-    exec_sql_statments(city_data_sql_statement)
+    exec_sql_statments(city_data_sql_statement, connect_to_minio=True)
 
 
 def consolidate_paris_data():
     """Consolide les données de Paris."""
     paris_sql_statement = f"""
-        {s3_statement}
-        create temp table Paris AS 
+        create temp table paris as 
             select * from read_json('s3://bicycle-data/{today_date}/paris_realtime_bicycle_data.json');
 
         insert or replace into consolidate_station 
         select 
             {PARIS_CITY_CODE} || '-' || stationcode as id,
-            stationcode AS code,
+            stationcode as code,
             name,
             nom_arrondissement_communes as city_name,
             code_insee_commune as city_code,
@@ -68,18 +51,18 @@ def consolidate_paris_data():
             is_installed as status,
             current_date() as created_date,
             capacity
-        from Paris;
+        from paris;
 
-        insert or replace into CONSOLIDATE_STATION_STATEMENT
+        insert or replace into consolidate_station_statement
         select 
             {PARIS_CITY_CODE} || '-' || stationcode as station_id,
-            numdocksavailable AS bicycle_docks_available,
-            numbikesavailable AS bicycle_available,
+            numdocksavailable as bicycle_docks_available,
+            numbikesavailable as bicycle_available,
             duedate as last_statement_date,
             current_date() as created_date
-        from Paris;
+        from paris;
     """
-    exec_sql_statments(paris_sql_statement)
+    exec_sql_statments(paris_sql_statement, connect_to_minio=True)
 
 
 def consolidate_nantes_toulouse():
@@ -89,8 +72,7 @@ def consolidate_nantes_toulouse():
 
     for city, city_code in zip(cities, cities_code):
         sql_statement = f"""
-            {s3_statement}
-            create temp table {city} AS 
+            create temp table {city} as 
                 select * from read_json('s3://bicycle-data/{today_date}/{city}_realtime_bicycle_data.json');
 
             insert or replace into consolidate_station 
@@ -108,7 +90,7 @@ def consolidate_nantes_toulouse():
                 bike_stands as capacity
             from {city};
 
-            insert or replace into CONSOLIDATE_STATION_STATEMENT
+            insert or replace into consolidate_station_statement
             select
                 {city_code} || '-' || number as station_id,
                 available_bike_stands as bicycle_docks_available,
@@ -117,14 +99,13 @@ def consolidate_nantes_toulouse():
                 current_date() as created_date
             from {city};
         """
-        exec_sql_statments(sql_statement)
+        exec_sql_statments(sql_statement, connect_to_minio=True)
 
 
 def consolidate_strasbourg_data():
     """Consolide les données de Strasbourg."""
     strasbourg_sql_statement = f"""
-        {s3_statement}
-        create temp table Strasbourg AS 
+        create temp table strasbourg as 
             select * from read_json('s3://bicycle-data/{today_date}/strasbourg_realtime_bicycle_data.json');
 
         insert or replace into consolidate_station
@@ -140,18 +121,18 @@ def consolidate_strasbourg_data():
             is_installed as status,
             current_date() as created_date,
             "to" as capacity
-        from Strasbourg;
+        from strasbourg;
 
-        insert or replace into CONSOLIDATE_STATION_STATEMENT 
+        insert or replace into consolidate_station_statement 
         select
             {STRASBOURG_CITY_CODE} || '-' || id as station_id,
             num_docks_available as bicycle_docks_available,
             av as bicycle_available,
             to_timestamp(last_reported::int) as last_statement_date,
             current_date() as created_date
-        from Strasbourg;
+        from strasbourg;
     """
-    exec_sql_statments(strasbourg_sql_statement)
+    exec_sql_statments(strasbourg_sql_statement, connect_to_minio=True)
 
 
 def data_consolidation() -> None:

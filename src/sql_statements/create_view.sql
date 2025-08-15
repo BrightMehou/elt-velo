@@ -1,80 +1,80 @@
-CREATE
-OR REPLACE VIEW MAP_STATION AS
-SELECT
-    ds.NAME,
-    ds.LATITUDE,
-    ds.LONGITUDE,
-    fss.BICYCLE_AVAILABLE,
-    ds.CAPACITTY,
-    fss.CREATED_DATE
-FROM
-    DIM_STATION ds
-    JOIN FACT_STATION_STATEMENT fss ON ds.ID = fss.STATION_ID
-WHERE
-    fss.CREATED_DATE = (
-        SELECT
-            MAX(CREATED_DATE)
-        FROM
-            FACT_STATION_STATEMENT
-        WHERE
-            STATION_ID = ds.ID
+create
+or replace view map_station as
+select
+    ds.name,
+    ds.latitude,
+    ds.longitude,
+    fss.bicycle_available,
+    ds.capacitty,
+    fss.created_date
+from
+    dim_station ds
+    join fact_station_statement fss on ds.id = fss.station_id
+where
+    fss.created_date = (
+        select
+            max(created_date)
+        from
+            fact_station_statement
+        where
+            station_id = ds.id
     )
-    AND ds.LATITUDE IS NOT NULL
-    AND ds.LONGITUDE IS NOT NULL;
+    and ds.latitude is not null
+    and ds.longitude is not null;
 
-CREATE
-OR REPLACE VIEW AVAILABLE_EMPLACEMENT_BY_CITY AS
-SELECT
-    dm.NAME,
-    tmp.SUM_BICYCLE_DOCKS_AVAILABLE
-FROM
-    DIM_CITY dm
-    INNER JOIN (
-        SELECT
-            CITY_ID,
-            SUM(BICYCLE_DOCKS_AVAILABLE) AS SUM_BICYCLE_DOCKS_AVAILABLE
-        FROM
-            FACT_STATION_STATEMENT
-        WHERE
-            CREATED_DATE = (
-                SELECT
-                    MAX(CREATED_DATE)
-                FROM
-                    CONSOLIDATE_STATION
+create
+or replace view available_emplacement_by_city as
+select
+    dm.name,
+    tmp.sum_bicycle_docks_available
+from
+    dim_city dm
+    inner join (
+        select
+            city_id,
+            sum(bicycle_docks_available) as sum_bicycle_docks_available
+        from
+            fact_station_statement
+        where
+            created_date = (
+                select
+                    max(created_date)
+                from
+                    consolidate_station
             )
-        GROUP BY
-            CITY_ID
-    ) tmp ON dm.ID = tmp.CITY_ID
-WHERE
-    lower(dm.NAME) IN ('paris', 'nantes', 'strasbourg', 'toulouse');
+        group by
+            city_id
+    ) tmp on dm.id = tmp.city_id
+where
+    lower(dm.name) in ('paris', 'nantes', 'strasbourg', 'toulouse');
 
-CREATE
-OR REPLACE VIEW MEAN_BICYCLE_AVAILABLE_BY_STATION AS
-SELECT
-    ds.NAME,
-    ds.CODE,
-    ds.ADDRESS,
-    tmp.AVG_DOCK_AVAILABLE
-FROM
-    DIM_STATION ds
-    JOIN (
-        SELECT
-            STATION_ID,
-            AVG(BICYCLE_AVAILABLE) AS AVG_DOCK_AVAILABLE
-        FROM
-            FACT_STATION_STATEMENT
-        GROUP BY
-            STATION_ID
-    ) tmp ON ds.ID = tmp.STATION_ID;
+create
+or replace view mean_bicycle_available_by_station as
+select
+    ds.name,
+    ds.code,
+    ds.address,
+    tmp.avg_dock_available
+from
+    dim_station ds
+    join (
+        select
+            station_id,
+            avg(bicycle_available) as avg_dock_available
+        from
+            fact_station_statement
+        group by
+            station_id
+    ) tmp on ds.id = tmp.station_id;
 
-CREATE
-OR REPLACE VIEW TOTAL_CAPACITY_BY_CITY AS
-SELECT
-    dc.name AS city_name,
-    SUM(ds.CAPACITTY) AS total_capacity
-FROM
-    DIM_STATION ds
-    JOIN FACT_STATION_STATEMENT fss ON ds.ID = fss.STATION_ID
-    JOIN DIM_CITY dc ON fss.CITY_ID = dc.ID
-GROUP BY
+create
+or replace view total_capacity_by_city as
+select
+    dc.name as city_name,
+    sum(ds.capacitty) as total_capacity
+from
+    dim_station ds
+    join fact_station_statement fss on ds.id = fss.station_id
+    join dim_city dc on fss.city_id = dc.id
+group by
     dc.name;

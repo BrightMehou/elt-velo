@@ -47,7 +47,7 @@ Dans le fichier Python `data_ingestion.py`
   - Récupère des données sur les communes.
 
 #### Produits :
-- Les données brutes sont enregistrées dans les fichiers JSON dans le répertoire dédié.
+- Les données brutes sont enregistrées dans les fichiers JSON dans le bucket dédié.
 
 ---
 

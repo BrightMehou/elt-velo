@@ -1,70 +1,70 @@
-INSERT
-    OR REPLACE INTO DIM_STATION
-SELECT
-    ID,
-    CODE,
-    NAME,
-    ADDRESS,
-    LONGITUDE,
-    LATITUDE,
-    STATUS,
-    CAPACITTY
-FROM
-    CONSOLIDATE_STATION
-WHERE
-    CREATED_DATE = (
-        SELECT
-            MAX(CREATED_DATE)
-        FROM
-            CONSOLIDATE_STATION
+insert
+    or replace into dim_station
+select
+    id,
+    code,
+    name,
+    address,
+    longitude,
+    latitude,
+    status,
+    capacitty
+from
+    consolidate_station
+where
+    created_date = (
+        select
+            max(created_date)
+        from
+            consolidate_station
     );
 
-INSERT
-    OR REPLACE INTO DIM_CITY
-SELECT
-    ID,
-    NAME,
-    NB_INHABITANTS
-FROM
-    CONSOLIDATE_CITY
-WHERE
-    CREATED_DATE = (
-        SELECT
-            MAX(CREATED_DATE)
-        FROM
-            CONSOLIDATE_CITY
+insert
+    or replace into dim_city
+select
+    id,
+    name,
+    nb_inhabitants
+from
+    consolidate_city
+where
+    created_date = (
+        select
+            max(created_date)
+        from
+            consolidate_city
     );
 
-INSERT
-    OR REPLACE INTO FACT_STATION_STATEMENT
-SELECT
-    STATION_ID,
-    cc.ID as CITY_ID,
-    BICYCLE_DOCKS_AVAILABLE,
-    BICYCLE_AVAILABLE,
-    LAST_STATEMENT_DATE,
-    current_date as CREATED_DATE
-FROM
-    CONSOLIDATE_STATION_STATEMENT
-    JOIN CONSOLIDATE_STATION ON CONSOLIDATE_STATION.ID = CONSOLIDATE_STATION_STATEMENT.STATION_ID
-    LEFT JOIN CONSOLIDATE_CITY as cc ON cc.ID = CONSOLIDATE_STATION.CITY_CODE
-WHERE
-    CITY_CODE != 0
-    AND CONSOLIDATE_STATION_STATEMENT.CREATED_DATE = (
-        SELECT
-            MAX(CREATED_DATE)
-        FROM
-            CONSOLIDATE_STATION_STATEMENT
+insert
+    or replace into fact_station_statement
+select
+    station_id,
+    cc.id as city_id,
+    bicycle_docks_available,
+    bicycle_available,
+    last_statement_date,
+    current_date as created_date
+from
+    consolidate_station_statement
+    join consolidate_station on consolidate_station.id = consolidate_station_statement.station_id
+    left join consolidate_city as cc on cc.id = consolidate_station.city_code
+where
+    city_code != 0
+    and consolidate_station_statement.created_date = (
+        select
+            max(created_date)
+        from
+            consolidate_station_statement
     )
-    AND CONSOLIDATE_STATION.CREATED_DATE = (
-        SELECT
-            MAX(CREATED_DATE)
-        FROM
-            CONSOLIDATE_STATION
+    and consolidate_station.created_date = (
+        select
+            max(created_date)
+        from
+            consolidate_station
     )
-    AND cc.CREATED_DATE = (
-        SELECT
-            MAX(CREATED_DATE)
-        FROM
-            CONSOLIDATE_CITY
+    and cc.created_date = (
+        select
+            max(created_date)
+        from
+            consolidate_city
     );
