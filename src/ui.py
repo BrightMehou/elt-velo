@@ -59,24 +59,24 @@ if st.session_state.loaded:
     with st.expander("🔍 Voir les données brutes"):
         st.markdown("**DIM_STATION**")
         st.dataframe(
-            con.execute("SELECT * FROM DIM_STATION").df(), use_container_width=True
+            con.execute("select * from dim_station").df(), use_container_width=True
         )
 
         st.markdown("**DIM_CITY**")
         st.dataframe(
-            con.execute("SELECT * FROM DIM_CITY").df(), use_container_width=True
+            con.execute("select * from dim_city").df(), use_container_width=True
         )
 
         st.markdown("**FACT_STATION_STATEMENT**")
         st.dataframe(
-            con.execute("SELECT * FROM FACT_STATION_STATEMENT").df(),
+            con.execute("select * from fact_station_statement").df(),
             use_container_width=True,
         )
 
     # 2️⃣ Carte interactive
     st.subheader("🗺️ Carte interactive des stations")
     query_map = """
-    SELECT * from MAP_STATION;
+    select * from map_station;
     """
     df_map = con.execute(query_map).df()
     if df_map.empty:
@@ -84,12 +84,12 @@ if st.session_state.loaded:
     else:
         fig = px.scatter_map(
             df_map,
-            lat="LATITUDE",
-            lon="LONGITUDE",
-            hover_name="NAME",
-            hover_data=["BICYCLE_AVAILABLE", "CAPACITTY"],
-            color="BICYCLE_AVAILABLE",
-            size="BICYCLE_AVAILABLE",
+            lat="latitude",
+            lon="longitude",
+            hover_name="name",
+            hover_data=["bicycle_available", "capacitty"],
+            color="bicycle_available",
+            size="bicycle_available",
             color_continuous_scale=px.colors.cyclical.IceFire,
             center=dict(lat=48.8566, lon=2.3522),  # Paris
             size_max=15,
@@ -105,19 +105,19 @@ if st.session_state.loaded:
 
     st.markdown("**1. Emplacements dispo par ville**")
     q1 = """
-        SELECT * FROM AVAILABLE_EMPLACEMENT_BY_CITY;
+        select * from available_emplacement_by_city;
     """
     st.dataframe(con.execute(q1).df(), use_container_width=True)
 
     st.markdown("**2. Moyenne vélos dispo par station**")
     q2 = """
-        SELECT * FROM MEAN_BICYCLE_AVAILABLE_BY_STATION;
+        select * from mean_bicycle_available_by_station;
     """
     st.dataframe(con.execute(q2).df(), use_container_width=True)
 
     st.markdown("**3. Capacité totale par ville**")
     q3 = """
-        SELECT * FROM TOTAL_CAPACITY_BY_CITY;
+        select * from total_capacity_by_city;
     """
     st.dataframe(con.execute(q3).df(), use_container_width=True)
 
