@@ -8,7 +8,7 @@ select
     longitude,
     latitude,
     status,
-    capacitty
+    capacity
 from
     consolidate_station
 where

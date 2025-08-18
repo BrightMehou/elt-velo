@@ -1,9 +1,16 @@
 .venv
 venv
 __pycache__
-tests
 
-data/raw_data/*
-!data/raw_data/.gitkeep
-data/duckdb/*
-!data/duckdb/.gitkeep
+
+target/
+dbt_packages/
+logs/
+
+
+**/*.duckdb
+**/*.duckdb.wal
+.user.yml
+
+elt/
+run_dbt.py

@@ -5,7 +5,7 @@ select
     ds.latitude,
     ds.longitude,
     fss.bicycle_available,
-    ds.capacitty,
+    ds.capacity,
     fss.created_date
 from
     dim_station ds
@@ -71,7 +71,7 @@ create
 or replace view total_capacity_by_city as
 select
     dc.name as city_name,
-    sum(ds.capacitty) as total_capacity
+    sum(ds.capacity) as total_capacity
 from
     dim_station ds
     join fact_station_statement fss on ds.id = fss.station_id

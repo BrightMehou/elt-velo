@@ -6,7 +6,7 @@ create table if not exists dim_station (
     longitude float,
     latitude float,
     status varchar,
-    capacitty integer
+    capacity integer
 );
 
 create table if not exists dim_city (
@@ -23,6 +23,6 @@ create table if not exists fact_station_statement (
     last_statement_date datetime,
     created_date date default current_date,
     primary key (station_id, city_id, created_date),
-    foreign key (station_id) references dim_station (id),
-    foreign key (city_id) references dim_city (id)
+    -- foreign key (station_id) references dim_station (id),
+    -- foreign key (city_id) references dim_city (id)
 );

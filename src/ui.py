@@ -87,7 +87,7 @@ if st.session_state.loaded:
             lat="latitude",
             lon="longitude",
             hover_name="name",
-            hover_data=["bicycle_available", "capacitty"],
+            hover_data=["bicycle_available", "capacity"],
             color="bicycle_available",
             size="bicycle_available",
             color_continuous_scale=px.colors.cyclical.IceFire,
