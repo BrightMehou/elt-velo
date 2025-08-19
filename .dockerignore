@@ -32,4 +32,12 @@
 **/values.dev.yaml
 LICENSE
 README.md
+
+
+target/
+dbt_packages/
+logs/
 .user.yml
+
+**/*.duckdb
+**/*.duckdb.wal

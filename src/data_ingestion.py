@@ -32,6 +32,31 @@ if not minio_client.bucket_exists(BUCKET_NAME):
     logger.info(f"Bucket '{BUCKET_NAME}' créé.")
 
 
+def serialize_data(raw_json: str, file_name: str) -> None:
+    f"""
+    Envoie les données JSON dans MinIO dans le bucket {BUCKET_NAME}.
+    Structure du chemin : YYYY-MM-DD/nom_fichier.json
+
+    Args:
+        raw_json (str): Les données brutes en format JSON sous forme de chaîne.
+        file_name (str): Nom du fichier dans lequel les données seront sauvegardées.
+    """
+    # Conversion en octets  et création d'un "fichier" virtuel en mémoire à partir des octets
+    data_bytes = raw_json.encode("utf-8")
+    data_stream = BytesIO(data_bytes)
+
+    object_key = f"{today_date}/{file_name}"
+
+    minio_client.put_object(
+        BUCKET_NAME,
+        object_key,
+        data_stream,
+        length=len(data_bytes),
+        content_type="application/json",
+    )
+
+    logger.info(f"Fichier envoyé dans MinIO : {BUCKET_NAME}/{object_key}")
+    
 def get_realtime_bicycle_data() -> None:
     """
     Récupère les données en temps réel des vélos pour Paris, Nantes, Toulouse et Strasbourg,
@@ -68,33 +93,6 @@ def get_commune_data() -> None:
         logger.error(
             f"Impossible de récupérer les communes (status: {response.status_code})"
         )
-
-
-def serialize_data(raw_json: str, file_name: str) -> None:
-    f"""
-    Envoie les données JSON dans MinIO dans le bucket {BUCKET_NAME}.
-    Structure du chemin : YYYY-MM-DD/nom_fichier.json
-
-    Args:
-        raw_json (str): Les données brutes en format JSON sous forme de chaîne.
-        file_name (str): Nom du fichier dans lequel les données seront sauvegardées.
-    """
-    # Conversion en octets  et création d'un "fichier" virtuel en mémoire à partir des octets
-    data_bytes = raw_json.encode("utf-8")
-    data_stream = BytesIO(data_bytes)
-
-    object_key = f"{today_date}/{file_name}"
-
-    minio_client.put_object(
-        BUCKET_NAME,
-        object_key,
-        data_stream,
-        length=len(data_bytes),
-        content_type="application/json",
-    )
-
-    logger.info(f"Fichier envoyé dans MinIO : {BUCKET_NAME}/{object_key}")
-
 
 def data_ingestion() -> None:
     """

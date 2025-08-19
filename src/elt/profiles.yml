@@ -1,0 +1,15 @@
+elt:                           
+  target: elt
+  outputs:
+    elt:
+      type: duckdb
+      path: data/duckdb/mobility_analysis.duckdb   # chemin relatif à src/elt
+      threads: 2
+      extensions:
+        - httpfs
+      settings:
+        s3_endpoint: "{{ env_var('minio_endpoint', 'localhost:9000') }}"
+        s3_access_key_id: "{{ env_var('minio_access_key', 'minioadmin') }}"
+        s3_secret_access_key: "{{ env_var('minio_secret_key', 'miniopassword') }}"
+        s3_use_ssl: false
+        s3_url_style: path

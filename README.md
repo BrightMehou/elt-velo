@@ -1,7 +1,8 @@
 ## 🚴 ETL-Velo
 
 Ce projet propose la mise en place d’un pipeline simple pour collecter, transformer et analyser les données des systèmes de vélos en libre-service de Paris, Nantes, Toulouse et Strasbourg.
-Les données sont stockées dans MinIO (data lake), consolidées dans DuckDB (data warehouse), puis présentées via Streamlit pour faciliter l’exploration et la visualisation des résultats.
+Les données sont stockées dans MinIO (data lake), transformées à l’aide de DBT (Data Build Tool) pour assurer la qualité, la modularité et la traçabilité des modèles de données, puis consolidées dans DuckDB (data warehouse). Enfin, elles sont présentées via Streamlit pour faciliter l’exploration et la visualisation des résultats.
+
 ---
 
 ## 📥 **Sources des Données**
@@ -20,6 +21,7 @@ Les données sont stockées dans MinIO (data lake), consolidées dans DuckDB (da
 ├── data/                      # Données utilisées par les processus
 │   └── duckdb/                # Base de données locale DuckDB
 ├── src/                       # Code source principal
+│   ├── elt/                   # Projet DBT pour la transformation des données
 │   ├── sql_statements/        # Requêtes SQL réutilisables
 │   ├── data_ingestion.py      # Ingestion des données en temps réel
 │   ├── data_transformation.py # Transformation des données brutes
@@ -51,33 +53,45 @@ Dans le fichier Python `data_ingestion.py`
 
 ---
 
-### **2. Consolidation des données**
-**Objectif** : Organiser et structurer les données brutes pour préparer leur utilisation.
-
-#### Étapes :
-Dans le fichier Python `data_transformation.py`
-- **`consolidate_city_data`** :
-  - Structure et nettoie les données des communes pour les préparer à l'analyse.
-- **`consolidate_station_data`** :
-  - Prépare et organise les informations sur les stations de vélos.
-
-
-#### Produits :
-- Les données consolidées sont enregistrées dans Duckdb et prêtes à être utilisées dans des étapes analytiques ou agrégées.
+Bien sûr Joane ! Voici une reformulation complète de ces deux sections pour refléter ton nouveau workflow basé sur **DBT**, tout en gardant une structure claire et professionnelle :
 
 ---
 
-### **3. Agrégation des données**
-**Objectif** : Synthétiser les données consolidées pour créer des vues ou métriques prêtes à l'analyse.
+### **2. Transformation des données avec DBT**  
+**Objectif** : Organiser, nettoyer et structurer les données brutes issues du data lake pour les rendre exploitables.
 
-#### Étapes :
-Dans le fichier Python `data_transformation.py`
-- **`data_agregation`** :
-  - Met à jour les tables dimensionnelle des villes (**DIM_CITY**), des stations (**DIM_STATION**) avec les données les plus récentes, 
-  - Met à jour la table factuelle des états des stations (**FACT_STATION_STATEMENT**) en associant les informations des stations et des villes.
+#### Étapes :  
+La transformation des données est orchestrée via **DBT**, selon une architecture modulaire :
 
-#### Produits :
-- Les données finales sont stockées sous forme de tables agrégées dans Duckdb, prêtes pour des analyses ou des visualisations.
+- 📁 **Staging**  
+  - Création de tables temporaires à partir des fichiers bruts stockés dans **MinIO**.  
+  - Ces modèles permettent de normaliser les formats et de préparer les données pour les étapes suivantes.
+
+- 📁 **Consolidate**  
+  - Construction de tables consolidées, alimentées en **mode incrémental**, pour intégrer les nouvelles données sans retraiter l’ensemble du dataset.  
+  - Les données des communes et des stations sont nettoyées, enrichies et structurées pour l’analyse.
+
+#### Produits :  
+- Les tables consolidées sont stockées dans **DuckDB** et servent de base aux modèles analytiques et aux vues agrégées.
+
+---
+
+### **3. Modélisation analytique et agrégation**  
+**Objectif** : Synthétiser les données consolidées pour produire des modèles analytiques et des vues prêtes à l’exploration.
+
+#### Étapes :  
+La modélisation suit une logique en étoile et se décompose en deux niveaux :
+
+- 📁 **Star_model**  
+  - Création des **tables dimensionnelles** (ex. : `dim_city`, `dim_station`) et de la **table factuelle** (`fact_station_statement`) en associant les données consolidées.  
+  - Ces modèles facilitent les jointures et les analyses multi-axes.
+
+- 📁 **Analytics**  
+  - Génération de **vues analytiques** prêtes à être exposées dans **Streamlit**.  
+  - Ces vues permettent d’explorer les métriques clés et les tendances du système de vélos en libre-service.
+
+#### Produits :  
+- Les vues finales sont stockées dans **DuckDB** et intégrées à l’interface Streamlit pour la visualisation interactive.
 
 ---
 

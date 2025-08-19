@@ -14,7 +14,6 @@ if __name__ == "__main__":
     table_definitions = {
         "create_consolidate_tables.sql": "Création des tables consolidées si elles n'existent pas.",
         "create_agregate_tables.sql": "Création des tables d'agrégation si elles n'existent pas.",
-        "create_view.sql": "Création des vues pour les requêtes.",
     }
 
     for file_name, log_message in table_definitions.items():

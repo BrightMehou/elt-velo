@@ -5,7 +5,7 @@ import plotly.express as px
 import streamlit as st
 
 from data_ingestion import data_ingestion
-from data_transformation import data_agregation, data_consolidation
+from data_transformation import data_transformation
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -32,8 +32,7 @@ if st.button("🔄 Alimenter et afficher"):
 
     steps = [
         ("Ingestion des données", data_ingestion),
-        ("Consolidation des données", data_consolidation),
-        ("Agrégation des données", data_agregation),
+        ("transformation des données", data_transformation),
     ]
     total_steps = len(steps)
     try:
