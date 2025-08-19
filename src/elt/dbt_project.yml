@@ -31,15 +31,15 @@ clean-targets:         # directories to be removed by `dbt clean`
 # files using the `{{ config(...) }}` macro.
 models:
   elt:
-    # Config indicated by + and applies to all files under models/example/
-    star_model:
-      +materialized: table
+    # Config indicated by + and applies to all files under models/example/    
     analytics:
       +materialized: view
     consolidate:
       +materialized: incremental
     staging:
       +materialized: ephemeral
+    star_model:
+      +materialized: table
 
 vars:
   PARIS_CITY_CODE : 1

@@ -25,7 +25,7 @@ create table if not exists consolidate_station_statement (
     station_id varchar not null,
     bicycle_docks_available integer,
     bicycle_available integer,
-    last_statement_date date,
+    last_statement_date timestamp,
     created_date date,
     primary key (station_id, created_date)
 );

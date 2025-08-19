@@ -7,7 +7,7 @@ select
    id as station_id,
    bicycle_docks_available,
    bicycle_available,
-   last_statement_date::date as last_statement_date,
+   last_statement_date::timestamp as last_statement_date,
    created_date
 from
      {{ ref('stg_station_statement') }}
