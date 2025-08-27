@@ -56,7 +56,8 @@ def serialize_data(raw_json: str, file_name: str) -> None:
     )
 
     logger.info(f"Fichier envoyé dans MinIO : {BUCKET_NAME}/{object_key}")
-    
+
+
 def get_realtime_bicycle_data() -> None:
     """
     Récupère les données en temps réel des vélos pour Paris, Nantes, Toulouse et Strasbourg,
@@ -93,6 +94,7 @@ def get_commune_data() -> None:
         logger.error(
             f"Impossible de récupérer les communes (status: {response.status_code})"
         )
+
 
 def data_ingestion() -> None:
     """

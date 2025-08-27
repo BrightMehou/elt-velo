@@ -25,7 +25,6 @@ Les données sont stockées dans MinIO (data lake), transformées à l’aide de
 │   ├── sql_statements/        # Requêtes SQL réutilisables
 │   ├── data_ingestion.py      # Ingestion des données en temps réel
 │   ├── data_transformation.py # Transformation des données brutes
-│   ├── duckdb_tools.py        # Utilitaires d'interaction avec DuckDB
 │   ├── init_db.py             # Fichier d'initialisation de la base de données
 │   └── ui.py                  # Interface utilisateur
 ├── docker-compose.yml         # Orchestration Docker Compose

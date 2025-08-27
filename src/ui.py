@@ -57,19 +57,15 @@ if st.session_state.loaded:
     # 1️⃣ Données brutes
     with st.expander("🔍 Voir les données brutes"):
         st.markdown("**DIM_STATION**")
-        st.dataframe(
-            con.execute("select * from dim_station").df(), use_container_width=True
-        )
+        st.dataframe(con.execute("select * from dim_station").df(), width="stretch")
 
         st.markdown("**DIM_CITY**")
-        st.dataframe(
-            con.execute("select * from dim_city").df(), use_container_width=True
-        )
+        st.dataframe(con.execute("select * from dim_city").df(), width="stretch")
 
         st.markdown("**FACT_STATION_STATEMENT**")
         st.dataframe(
             con.execute("select * from fact_station_statement").df(),
-            use_container_width=True,
+            width="stretch",
         )
 
     # 2️⃣ Carte interactive
@@ -95,7 +91,7 @@ if st.session_state.loaded:
             height=600,
             zoom=11,
         )
-        st.plotly_chart(fig, use_container_width=True, height=600)
+        st.plotly_chart(fig, width="stretch", height=600)
 
     st.markdown("---")
 
@@ -106,19 +102,19 @@ if st.session_state.loaded:
     q1 = """
         select * from available_emplacement_by_city;
     """
-    st.dataframe(con.execute(q1).df(), use_container_width=True)
+    st.dataframe(con.execute(q1).df(), width="stretch")
 
     st.markdown("**2. Moyenne vélos dispo par station**")
     q2 = """
         select * from mean_bicycle_available_by_station;
     """
-    st.dataframe(con.execute(q2).df(), use_container_width=True)
+    st.dataframe(con.execute(q2).df(), width="stretch")
 
     st.markdown("**3. Capacité totale par ville**")
     q3 = """
         select * from total_capacity_by_city;
     """
-    st.dataframe(con.execute(q3).df(), use_container_width=True)
+    st.dataframe(con.execute(q3).df(), width="stretch")
 
     con.close()
     st.caption("Données issues des API publiques des stations de vélos.")
