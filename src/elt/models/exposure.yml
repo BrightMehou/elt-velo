@@ -1,0 +1,21 @@
+version: 2
+
+exposures:
+
+  - name: streamlit
+    label: "Dashboard Streamlit"
+    type: dashboard
+    maturity: high
+    url: http://localhost:8501
+    description: >
+      Tableau de bord interactif des stations de vélos (données temps réel et indicateurs clés).
+    depends_on:
+      - ref('map_station')
+      - ref('available_emplacement_by_city')
+      - ref('mean_bicycle_available_by_station')
+      - ref('total_capacity_by_city')
+    owner:
+      name: "Equipe Data"
+      email: "data-team@entreprise.com"
+
+  

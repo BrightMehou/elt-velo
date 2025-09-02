@@ -1,0 +1,135 @@
+version: 2
+
+models:
+  - name: consolidate_station
+    description: "Table des stations de vélos avec leurs informations générales."
+    columns:
+      - name: id
+        description: "Identifiant unique de la station."
+        tests:
+          - not_null
+      - name: code
+        description: "Code de la station."
+        tests:
+          - not_null
+      - name: name
+        description: "Nom de la station."
+      - name: city_name
+        description: "Nom de la ville associée à la station."
+      - name: city_code
+        description: "Code de la ville."
+      - name: address
+        description: "Adresse postale de la station."
+      - name: longitude
+        description: "Longitude géographique de la station."
+      - name: latitude
+        description: "Latitude géographique de la station."
+      - name: status
+        description: "Statut de la station (ouverte/fermée/etc)."
+      - name: created_date
+        description: "Date de création de l'enregistrement."
+        tests:
+          - not_null
+      - name: capacity
+        description: "Capacité en nombre de vélos."
+    tests:
+      - unique:
+          column_name: "(id || '-' || created_date)"
+
+  - name: consolidate_city
+    description: "Table des villes avec le nombre d’habitants."
+    columns:
+      - name: id
+        description: "Identifiant unique de la ville."
+        tests:
+          - not_null
+      - name: name
+        description: "Nom de la ville."
+      - name: nb_inhabitants
+        description: "Nombre d’habitants."
+      - name: created_date
+        description: "Date de création de l’enregistrement."
+        tests:
+          - not_null
+    tests:
+      - unique:
+          column_name: "(id || '-' || created_date)"
+
+  - name: consolidate_station_statement
+    description: "Table des relevés quotidiens de disponibilité des stations."
+    columns:
+      - name: station_id
+        description: "Référence à l'identifiant de la station."
+        tests:
+          - not_null
+      - name: bicycle_docks_available
+        description: "Nombre de places libres pour garer un vélo."
+      - name: bicycle_available
+        description: "Nombre de vélos disponibles."
+      - name: last_statement_date
+        description: "Horodatage du dernier relevé."
+      - name: created_date
+        description: "Date de création de l’enregistrement."
+        tests:
+          - not_null
+
+  - name: dim_station
+    description: "Dimension des stations de vélos, contenant les informations statiques."
+    columns:
+      - name: id
+        description: "Identifiant unique de la station."
+        tests:
+          - not_null
+          - unique
+      - name: code
+        description: "Code de la station."
+      - name: name
+        description: "Nom de la station."
+      - name: address
+        description: "Adresse de la station."
+      - name: longitude
+        description: "Longitude géographique."
+      - name: latitude
+        description: "Latitude géographique."
+      - name: status
+        description: "Statut de la station (ouverte/fermée/etc)."
+      - name: capacity
+        description: "Capacité maximale de vélos."
+
+  - name: dim_city
+    description: "Dimension des villes, contenant le nombre d’habitants."
+    columns:
+      - name: id
+        description: "Identifiant unique de la ville."
+        tests:
+          - not_null
+          - unique
+      - name: name
+        description: "Nom de la ville."
+      - name: nb_inhabitants
+        description: "Nombre d’habitants de la ville."
+
+  - name: fact_station_statement
+    description: "Table de faits contenant les relevés de disponibilité des stations par date et ville."
+    columns:
+      - name: station_id
+        description: "Identifiant de la station (FK vers dim_station)."
+        tests:
+          - not_null
+      - name: city_id
+        description: "Identifiant de la ville (FK vers dim_city)."
+        tests:
+          - not_null
+      - name: bicycle_docks_available
+        description: "Nombre de places libres pour vélos."
+      - name: bicycle_available
+        description: "Nombre de vélos disponibles."
+      - name: last_statement_date
+        description: "Horodatage du dernier relevé."
+      - name: created_date
+        description: "Date de création de l’enregistrement (par défaut aujourd'hui)."
+        tests:
+          - not_null
+    tests:
+      - unique:
+          column_name: "(station_id || '-' || city_id || '-' || created_date)"

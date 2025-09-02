@@ -1,0 +1,9 @@
+groups:
+  - name: consolidate
+    owner:
+      name: "Equipe Data"
+      email: "data-team@entreprise.com"
+    description: Les données des communes et des stations sont nettoyées, enrichies et structurées pour l’analyse.
+    config:
+      meta: 
+        data_owner: data team
