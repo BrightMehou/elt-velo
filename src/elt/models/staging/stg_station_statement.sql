@@ -5,8 +5,8 @@ select
     duedate as last_statement_date,
     current_date() as created_date,
 from
-    read_parquet(
-        's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/paris_realtime_bicycle_data.parquet'
+    read_json(
+        's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/paris_realtime_bicycle_data.json'
     )
 union
 all -- Nantes avec jointure city_code
@@ -17,8 +17,8 @@ select
     last_update as last_statement_date,
     current_date() as created_date
 from
-    read_parquet(
-        's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/nantes_realtime_bicycle_data.parquet'
+    read_json(
+        's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/nantes_realtime_bicycle_data.json'
     ) 
 union
 all -- Toulouse avec jointure city_code
@@ -29,8 +29,8 @@ select
     last_update as last_statement_date,
     current_date() as created_date
 from
-    read_parquet(
-        's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/toulouse_realtime_bicycle_data.parquet'
+    read_json(
+        's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/toulouse_realtime_bicycle_data.json'
     ) 
 union
 all -- Strasbourg avec jointure city_code
@@ -41,4 +41,4 @@ select
     to_timestamp(last_reported::int) as last_statement_date,
     current_date() as created_date
 from
-    read_parquet('s3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/strasbourg_realtime_bicycle_data.parquet')
+    read_json('s3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/strasbourg_realtime_bicycle_data.json')

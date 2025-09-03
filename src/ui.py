@@ -26,29 +26,28 @@ st.markdown(
 )
 
 if st.button("🔄 Alimenter et afficher"):
-    progress = st.progress(0)
-
-    step = 0
-
-    steps = [
-        ("Ingestion des données", data_ingestion),
-        ("transformation des données", data_transformation),
-    ]
-    total_steps = len(steps)
     try:
-        for index, (label, func) in enumerate(steps, start=1):
-            logger.info(f"{index}/{total_steps} – {label}")
-            func()
-            step += 1
-            progress.progress(int(step / total_steps * 100), text=label)
+        with st.status("🚀 Lancement du pipeline...", expanded=True) as status:
+            steps = [
+                ("Ingestion des données", data_ingestion),
+                ("Transformation des données", data_transformation),
+            ]
 
-        st.success("✅ Données alimentées et prêtes à l’affichage !")
-        st.session_state.loaded = True
+            for label, func in steps:
+                status.update(label=label, state="running")
+                logger.info(label)
+                func()
+                status.update(label=f"✅ {label}", state="complete")
+
+            status.update(label="✅ Pipeline terminé avec succès !", state="complete")
+            st.success("Données alimentées et prêtes à l’affichage !")
+            st.session_state.loaded = True
 
     except Exception as e:
         logger.exception("Erreur pipeline")
         st.error(f"❌ Échec du pipeline à l'étape '{label}' : {e}")
         st.session_state.loaded = False
+
 
 if st.session_state.loaded:
     # Connexion DuckDB

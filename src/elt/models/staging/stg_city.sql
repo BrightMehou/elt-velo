@@ -4,6 +4,6 @@ select
     population as nb_inhabitants,
     current_date() as created_date
 from
-    read_parquet(
-        's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/commune_data.parquet'
+    read_json(
+        's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/commune_data.json'
     )
