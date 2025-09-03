@@ -1,8 +1,10 @@
+import json
 import logging
 import os
 from datetime import datetime
 from io import BytesIO
 
+import pandas as pd
 import requests
 from minio import Minio
 
@@ -32,30 +34,38 @@ if not minio_client.bucket_exists(BUCKET_NAME):
     logger.info(f"Bucket '{BUCKET_NAME}' créé.")
 
 
-def serialize_data(raw_json: str, file_name: str) -> None:
-    f"""
-    Envoie les données JSON dans MinIO dans le bucket {BUCKET_NAME}.
-    Structure du chemin : YYYY-MM-DD/nom_fichier.json
+def serialize_data_parquet(raw_json: str, file_name: str) -> None:
+    """
+    Convertit les données JSON en DataFrame aplanie,
+    puis les enregistre en mémoire au format Parquet avant de les transférer dans MinIO.
 
     Args:
-        raw_json (str): Les données brutes en format JSON sous forme de chaîne.
-        file_name (str): Nom du fichier dans lequel les données seront sauvegardées.
+        raw_json (str): Chaîne JSON brute récupérée depuis une API.
+        file_name (str): Nom de base du fichier (sans extension).
+                         Le fichier final sera stocké dans MinIO sous :
+                         YYYY-MM-DD/<file_name>.parquet
     """
-    # Conversion en octets  et création d'un "fichier" virtuel en mémoire à partir des octets
-    data_bytes = raw_json.encode("utf-8")
-    data_stream = BytesIO(data_bytes)
+    records = json.loads(raw_json)  # Parse le JSON en objet Python
+    df = pd.json_normalize(records)  # Aplati le JSON en table tabulaire
 
-    object_key = f"{today_date}/{file_name}"
+    buffer = BytesIO()
+    df.to_parquet(
+        buffer, index=False, engine="pyarrow"
+    )  # Conversion DataFrame → Parquet
 
+    # ⚠️ Très important : remettre le curseur au début du buffer,
+    # sinon MinIO lira à partir de la fin et enverra un fichier vide.
+    buffer.seek(0)
+
+    object_key = f"{today_date}/{file_name}.parquet"
     minio_client.put_object(
         BUCKET_NAME,
         object_key,
-        data_stream,
-        length=len(data_bytes),
-        content_type="application/json",
+        buffer,
+        length=len(buffer.getvalue()),
+        content_type="application/octet-stream",
     )
-
-    logger.info(f"Fichier envoyé dans MinIO : {BUCKET_NAME}/{object_key}")
+    logger.info(f"Fichier Parquet envoyé dans MinIO : {BUCKET_NAME}/{object_key}")
 
 
 def get_realtime_bicycle_data() -> None:
@@ -73,7 +83,7 @@ def get_realtime_bicycle_data() -> None:
     for city, url in urls.items():
         response = requests.get(url)
         if response.status_code == 200:
-            serialize_data(response.text, f"{city}_realtime_bicycle_data.json")
+            serialize_data_parquet(response.text, f"{city}_realtime_bicycle_data")
         else:
             logger.error(
                 f"Impossible de récupérer {city} (status: {response.status_code})"
@@ -88,7 +98,7 @@ def get_commune_data() -> None:
     response = requests.get(url)
 
     if response.status_code == 200:
-        serialize_data(response.text, "commune_data.json")
+        serialize_data_parquet(response.text, "commune_data")
         logger.info("Les données des communes ont été récupérées et envoyées à MinIO")
     else:
         logger.error(

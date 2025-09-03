@@ -3,7 +3,7 @@ elt:
   outputs:
     elt:
       type: duckdb
-      path: data/duckdb/mobility_analysis.duckdb   # chemin relatif à src/elt
+      path: data/duckdb/mobility_analysis.duckdb   
       threads: 2
       extensions:
         - httpfs
