@@ -1,9 +1,14 @@
 select 
+    ds.id,
+    ds.code,
     ds.name,
+    ds.address,
     ds.latitude,
     ds.longitude,
-    fss.bicycle_available,
+    ds.status,
     ds.capacity,
+    fss.bicycle_docks_available,
+    fss.bicycle_available,
     fss.last_statement_date
 from {{ ref('dim_station') }} ds
 join {{ ref('fact_station_statement') }} fss 
