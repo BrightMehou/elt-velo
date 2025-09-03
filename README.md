@@ -50,11 +50,6 @@ Dans le fichier Python `data_ingestion.py`
 #### Produits :
 - Les données brutes sont enregistrées dans les fichiers JSON dans le bucket dédié.
 
----
-
-Bien sûr Joane ! Voici une reformulation complète de ces deux sections pour refléter ton nouveau workflow basé sur **DBT**, tout en gardant une structure claire et professionnelle :
-
----
 
 ### **2. Transformation des données avec DBT**  
 **Objectif** : Organiser, nettoyer et structurer les données brutes issues du data lake pour les rendre exploitables.
