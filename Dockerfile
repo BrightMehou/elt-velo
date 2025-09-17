@@ -1,20 +1,26 @@
 FROM python:3.12-slim
-
-
-# Installer Poetry via pip
-RUN pip install poetry
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock /app/
-RUN poetry install --no-root --without dev
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
 
-# Copy the source code into the container.
-COPY src/ /app/src/
-COPY data/ /app/data/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project --no-dev
 
-# Expose the port that the application listens on.
+COPY . /app
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+ENTRYPOINT []
+
 EXPOSE 8501
 
-# Run the application.
-CMD poetry run python src/init_db.py && poetry run streamlit run src/ui.py   --server.port 8501 --server.address 0.0.0.0
+CMD python src/init_db.py && streamlit run src/ui.py   --server.port 8501 --server.address 0.0.0.0

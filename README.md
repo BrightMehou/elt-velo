@@ -29,9 +29,9 @@ Les données sont stockées dans MinIO (data lake), transformées à l’aide de
 │   └── ui.py                  # Interface utilisateur
 ├── docker-compose.yml         # Orchestration Docker Compose
 ├── Dockerfile                 # Configuration Docker
-├── poetry.lock                # Verrouillage des dépendances Poetry
-├── pyproject.toml             # Configuration du projet Poetry
-└── README.md                  # Documentation du projet
+├── pyproject.toml             # Configuration du projet uv
+├── README.md                  # Documentation du projet
+└── uv.lock                    # Verrouillage des dépendances uv
 ```
 
 ---
