@@ -1,3 +1,12 @@
+"""
+Script de transformation des données via dbt.
+
+Fonctionnalités principales :
+- Lance la commande `dbt run` en utilisant le projet défini dans `src/elt`.
+- Capture et journalise les sorties standard et erreurs.
+- Fournit une fonction principale `data_transformation()` pour exécuter le pipeline ELT.
+"""
+
 import logging
 import subprocess
 

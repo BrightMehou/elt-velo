@@ -1,3 +1,15 @@
+"""
+Script d’ingestion de données temps réel pour les vélos et les communes françaises,
+avec stockage dans MinIO.
+
+Fonctionnalités principales :
+- Connexion automatique à un bucket MinIO (création si inexistant).
+- Récupération des données temps réel pour les vélos (Paris, Nantes, Toulouse, Strasbourg).
+- Récupération des données des communes françaises via l’API gouvernementale.
+- Sérialisation et stockage des données brutes JSON dans MinIO
+  avec une structure de chemin : YYYY-MM-DD/nom_fichier.json.
+"""
+
 import logging
 import os
 from datetime import datetime

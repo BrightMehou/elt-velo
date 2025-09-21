@@ -1,3 +1,13 @@
+"""
+Tableau de bord Streamlit pour l’analyse de mobilité urbaine 🚲.
+
+Fonctionnalités principales :
+- Lancement du pipeline (ingestion + transformation) via un bouton.
+- Visualisation des données DuckDB (tables brutes et agrégées).
+- Carte interactive des stations avec Plotly.
+- Indicateurs clés par ville et par station.
+"""
+
 import logging
 
 import duckdb
