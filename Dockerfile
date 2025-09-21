@@ -21,6 +21,15 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 ENTRYPOINT []
 
-EXPOSE 8501
+# Expose Streamlit (8501) et dbt docs (8080)
+EXPOSE 8501 8080
 
-CMD python src/init_db.py && streamlit run src/ui.py   --server.port 8501 --server.address 0.0.0.0
+ENTRYPOINT []
+
+CMD bash -c "\
+  python src/init_db.py && \
+  dbt docs generate --project-dir src/elt --profiles-dir src/elt && \
+  (streamlit run src/ui.py --server.port 8501 --server.address 0.0.0.0 &) && \
+  (dbt docs serve --project-dir src/elt --profiles-dir src/elt --port 8080 --host 0.0.0.0)"
+
+

@@ -10,11 +10,12 @@ services:
       MINIO_ROOT_USER: minioadmin          
       MINIO_ROOT_PASSWORD: miniopassword  
     command: server /data --console-address ":9001"
-  ui:
+  app:
     build:
       context: .
     ports:
-      - "8501:8501"
+      - "8501:8501"   # Streamlit
+      - "8080:8080"   # DBT Documentation
     environment:
       - minio_endpoint=minio:9000
       - minio_access_key=minioadmin

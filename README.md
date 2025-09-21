@@ -93,8 +93,8 @@ La modélisation suit une logique en étoile et se décompose en deux niveaux :
 
 1. **Cloner le dépôt :**  
    ```bash
-   git clone https://github.com/BrightMehou/etl-velo.git
-   cd etl-velo
+   git clone https://github.com/BrightMehou/elt-velo.git
+   cd elt-velo
    ```
 
 2. **Installer Docker** : 
@@ -107,6 +107,9 @@ La modélisation suit une logique en étoile et se décompose en deux niveaux :
 
 4. **Accéder à l'interface streamlit :**  
    Rendez-vous sur [http://localhost:8501](http://localhost:8501) 
+
+5. **Accéder à la documentation DBT :**  
+   Rendez-vous sur [http://localhost:8080](http://localhost:8080) 
 
 ---
 
