@@ -39,8 +39,10 @@ models:
       +group: consolidate
     staging:
       +materialized: ephemeral
+      +group: staging
     star_model:
       +materialized: table
+      +group: star_model
 
 vars:
   PARIS_CITY_CODE : 1

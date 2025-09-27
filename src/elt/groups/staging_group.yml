@@ -1,0 +1,9 @@
+groups:
+  - name: staging
+    owner:
+      name: "Equipe Data"
+      email: "data-team@entreprise.com"
+    description: Ces tables éphémères permettent de transformer les données brutes (json) en données tabulaires prêtes à être utilisées dans les modèles en aval.
+    config:
+      meta: 
+        data_owner: data team

@@ -1,0 +1,9 @@
+groups:
+  - name: star_model
+    owner:
+      name: "Equipe Data"
+      email: "data-team@entreprise.com"
+    description: Ces tables organisées en étoile sont utilisées pour les analyses et les rapports.
+    config:
+      meta: 
+        data_owner: data team
