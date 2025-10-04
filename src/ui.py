@@ -3,32 +3,35 @@ Tableau de bord Streamlit pour l’analyse de mobilité urbaine 🚲.
 
 Fonctionnalités principales :
 - Lancement du pipeline (ingestion + transformation) via un bouton.
-- Visualisation des données DuckDB (tables brutes et agrégées).
 - Carte interactive des stations avec Plotly.
 - Indicateurs clés par ville et par station.
 """
 
 import logging
+from typing import Callable
 
 import duckdb
 import plotly.express as px
 import streamlit as st
+from pandas import DataFrame
+from plotly.graph_objects import Figure
 
 from data_ingestion import data_ingestion
 from data_transformation import data_transformation
+from utils import DUCKDB_PATH
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 logger.info("Démarrage de l'application Streamlit.")
-
 
 st.set_page_config(page_title="Tableau de bord mobilité 🚲", layout="wide")
 
 
 if "loaded" not in st.session_state:
     st.session_state.loaded = False
+
 
 st.title("📊 Tableau de bord des stations de vélos 🚲")
 st.markdown(
@@ -38,7 +41,7 @@ st.markdown(
 if st.button("🔄 Alimenter et afficher"):
     try:
         with st.status("🚀 Lancement du pipeline...", expanded=True) as status:
-            steps = [
+            steps: list[tuple[str, Callable[[], None]]] = [
                 ("Ingestion des données", data_ingestion),
                 ("Transformation des données", data_transformation),
             ]
@@ -60,33 +63,17 @@ if st.button("🔄 Alimenter et afficher"):
 
 
 if st.session_state.loaded:
-    # Connexion DuckDB
-    con = duckdb.connect("data/duckdb/mobility_analysis.duckdb", read_only=True)
+    con: duckdb.DuckDBPyConnection = duckdb.connect(DUCKDB_PATH, read_only=True)
 
-    # 1️⃣ Données brutes
-    with st.expander("🔍 Voir les données brutes"):
-        st.markdown("**DIM_STATION**")
-        st.dataframe(con.execute("select * from dim_station").df(), width="stretch")
-
-        st.markdown("**DIM_CITY**")
-        st.dataframe(con.execute("select * from dim_city").df(), width="stretch")
-
-        st.markdown("**FACT_STATION_STATEMENT**")
-        st.dataframe(
-            con.execute("select * from fact_station_statement").df(),
-            width="stretch",
-        )
-
-    # 2️⃣ Carte interactive
     st.subheader("🗺️ Carte interactive des stations")
-    query_map = """
+    query_map: str = """
     select * from map_station;
     """
-    df_map = con.execute(query_map).df()
+    df_map: DataFrame = con.execute(query_map).df()
     if df_map.empty:
         st.warning("Aucune donnée pour la carte.")
     else:
-        fig = px.scatter_map(
+        fig: Figure = px.scatter_map(
             df_map,
             lat="latitude",
             lon="longitude",
@@ -112,26 +99,24 @@ if st.session_state.loaded:
 
     st.markdown("---")
 
-    # 3️⃣ Indicateurs clés
     st.subheader("📈 Indicateurs clés")
 
-    st.markdown("**1. Emplacements dispo par ville**")
-    q1 = """
-        select * from available_emplacement_by_city;
-    """
-    st.dataframe(con.execute(q1).df(), width="stretch")
+    queries: list[tuple[str, str]] = [
+        (
+            "1. Emplacements dispo par ville",
+            "select * from available_emplacement_by_city;",
+        ),
+        (
+            "2. Moyenne vélos dispo par station",
+            "select * from mean_bicycle_available_by_station;",
+        ),
+        ("3. Capacité totale par ville", "select * from total_capacity_by_city;"),
+    ]
 
-    st.markdown("**2. Moyenne vélos dispo par station**")
-    q2 = """
-        select * from mean_bicycle_available_by_station;
-    """
-    st.dataframe(con.execute(q2).df(), width="stretch")
-
-    st.markdown("**3. Capacité totale par ville**")
-    q3 = """
-        select * from total_capacity_by_city;
-    """
-    st.dataframe(con.execute(q3).df(), width="stretch")
+    for title, query in queries:
+        st.markdown(f"**{title}**")
+        df = con.execute(query).df()
+        st.dataframe(df, width="stretch")
 
     con.close()
     st.caption("Données issues des API publiques des stations de vélos.")

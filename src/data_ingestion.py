@@ -1,12 +1,10 @@
 """
-Script d’ingestion de données temps réel pour les vélos et les communes françaises,
-avec stockage dans MinIO.
+Script d'ingestion des données en temps réel pour l'analyse de mobilité.
 
 Fonctionnalités principales :
-- Récupération des données temps réel pour les vélos (Paris, Nantes, Toulouse, Strasbourg).
-- Récupération des données des communes françaises via l’API gouvernementale.
-- Sérialisation et stockage des données brutes JSON dans MinIO
-  avec une structure de chemin : YYYY-MM-DD/nom_fichier.json.
+- Récupération des données vélo en temps réel pour Paris, Nantes, Toulouse et Strasbourg.
+- Récupération des données des communes françaises via l'API geo.gouv.fr.
+- Stockage des données dans MinIO, avec création de fichiers JSON vides en cas d'erreur ou d'indisponibilité.
 """
 
 import logging

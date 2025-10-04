@@ -1,10 +1,9 @@
 """
-Script d’initialisation de la base DuckDB pour l’analyse de mobilité.
+Script d'initialisation des couches de stockage pour l'analyse de mobilité.
 
 Fonctionnalités principales :
-- Lit et exécute les fichiers SQL situés dans `src/sql_statements/`.
-- Crée les tables consolidées et d’agrégation si elles n’existent pas.
-- Journalise les étapes d’initialisation.
+- Création des tables consolidées et d'agrégation dans DuckDB.
+- Initialisation du bucket MinIO pour le stockage des données.
 """
 
 import logging

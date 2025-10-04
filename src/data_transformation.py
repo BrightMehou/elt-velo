@@ -1,10 +1,9 @@
 """
-Script de transformation des données via dbt.
+Script de transformation des données pour l'analyse de mobilité.
 
 Fonctionnalités principales :
-- Lance la commande `dbt run` en utilisant le projet défini dans `src/elt`.
-- Capture et journalise les sorties standard et erreurs.
-- Fournit une fonction principale `data_transformation()` pour exécuter le pipeline ELT.
+- Exécute les transformations ELT via `dbt run` dans le projet `src/elt`.
+- Capture et journalise les sorties standard et d'erreur de dbt.
 """
 
 import logging
@@ -42,7 +41,3 @@ def data_transformation() -> None:
     except subprocess.CalledProcessError as e:
         logger.error("❌ Erreur pendant le dbt run")
         logger.error(e.stderr)
-
-
-if __name__ == "__main__":
-    data_transformation()

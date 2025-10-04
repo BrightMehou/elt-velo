@@ -1,3 +1,12 @@
+"""
+Module d'utilitaires pour DuckDB et MinIO.
+
+Fonctions réutilisables pour :
+- Exécution de fichiers SQL sur DuckDB
+- Initialisation de buckets MinIO
+- Envoi de fichiers JSON vers MinIO
+"""
+
 import logging
 import os
 from datetime import datetime

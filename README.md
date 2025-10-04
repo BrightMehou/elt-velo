@@ -25,10 +25,12 @@ Les données sont stockées dans MinIO (data lake), transformées à l’aide de
 │   ├── sql_statements/        # Requêtes SQL réutilisables
 │   ├── data_ingestion.py      # Ingestion des données en temps réel
 │   ├── data_transformation.py # Transformation des données brutes
-│   ├── init_db.py             # Fichier d'initialisation de la base de données
-│   └── ui.py                  # Interface utilisateur
-├── docker-compose.yml         # Orchestration Docker Compose
+│   ├── init_storage_layers.py # Fichier d'initialisation de la base de données
+│   ├── ui.py                  # Interface utilisateur
+│   └── utils.py               # Fonctions utilitaires
+├── docker-compose.yml         # Orchestration des services 
 ├── Dockerfile                 # Configuration Docker
+├── init_app.sh                # Script pour initialiser l'application dans docker
 ├── pyproject.toml             # Configuration du projet uv
 ├── README.md                  # Documentation du projet
 └── uv.lock                    # Verrouillage des dépendances uv
@@ -70,7 +72,7 @@ La transformation des données est orchestrée via **DBT**, selon une architectu
 
 ---
 
-### **3. Modélisation analytique et agrégation**  
+### **3. Modélisation analytique**  
 **Objectif** : Synthétiser les données consolidées pour produire des modèles analytiques et des vues prêtes à l’exploration.
 
 #### Étapes :  
@@ -110,34 +112,3 @@ La modélisation suit une logique en étoile et se décompose en deux niveaux :
 
 5. **Accéder à la documentation DBT :**  
    Rendez-vous sur [http://localhost:8080](http://localhost:8080) 
-
----
-
-## 📊 **Analyse des données**
-
-
-Vous devriez obtenir les résultats des requêtes suivantes.
-
-#### 1. Nombre d'emplacements disponibles pour les vélos dans une ville :
-```sql
-SELECT dm.NAME, tmp.SUM_BICYCLE_DOCKS_AVAILABLE
-FROM DIM_CITY dm
-INNER JOIN (
-    SELECT CITY_ID, SUM(BICYCLE_DOCKS_AVAILABLE) AS SUM_BICYCLE_DOCKS_AVAILABLE
-    FROM FACT_STATION_STATEMENT
-    WHERE CREATED_DATE = (SELECT MAX(CREATED_DATE) FROM CONSOLIDATE_STATION)
-    GROUP BY CITY_ID
-) tmp ON dm.ID = tmp.CITY_ID
-WHERE lower(dm.NAME) IN ('paris', 'nantes', 'strasbourg', 'toulouse');
-```
-
-#### 2. Moyenne des vélos disponibles par station :
-```sql
-SELECT ds.NAME, ds.CODE, ds.ADDRESS, tmp.AVG_DOCK_AVAILABLE
-FROM DIM_STATION ds
-JOIN (
-    SELECT STATION_ID, AVG(BICYCLE_AVAILABLE) AS AVG_DOCK_AVAILABLE
-    FROM FACT_STATION_STATEMENT
-    GROUP BY STATION_ID
-) tmp ON ds.ID = tmp.STATION_ID;
-```
