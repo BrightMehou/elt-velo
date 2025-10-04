@@ -19,17 +19,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-ENTRYPOINT []
-
 # Expose Streamlit (8501) et dbt docs (8080)
 EXPOSE 8501 8080
+COPY init_app.sh /init_app.sh
 
-ENTRYPOINT []
-
-CMD bash -c "\
-  python src/init_storage_layers.py && \
-  dbt docs generate --project-dir src/elt --profiles-dir src/elt && \
-  (streamlit run src/ui.py --server.port 8501 --server.address 0.0.0.0 &) && \
-  (dbt docs serve --project-dir src/elt --profiles-dir src/elt --port 8080 --host 0.0.0.0)"
-
-
+ENTRYPOINT ["/bin/bash", "/init_app.sh"]

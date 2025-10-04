@@ -9,42 +9,19 @@ Fonctionnalités principales :
 
 import logging
 
-import duckdb
-from minio_utils import init_minio_bucket
+from utils import exec_sql_from_file, init_minio_bucket
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger(__name__)
-
-duckdb_path = "data/duckdb/mobility_analysis.duckdb"
-
-
-def exec_sql_from_file(
-    file_name: str,
-    log_message: str,
-) -> None:
-    """
-    Crée les tables définies dans un fichier SQL.
-
-    Les instructions SQL sont lues depuis le fichier spécifié,
-    situé dans le répertoire `src/sql_statements`, et exécutées
-    une par une sur la base de données `mobility_analysis.duckdb`.
-    """
-    con = duckdb.connect(database=duckdb_path, read_only=False)
-    with open(f"src/sql_statements/{file_name}") as fd:
-        statements = fd.read()
-
-        for statement in statements.split(";"):
-            con.execute(statement)
-        logger.info(log_message)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    
+
     logger.info("Initialisation de la base de données DuckDB.")
 
-    table_definitions = {
+    table_definitions: dict[str, str] = {
         "create_consolidate_tables.sql": "Création des tables consolidées si elles n'existent pas.",
         "create_agregate_tables.sql": "Création des tables d'agrégation si elles n'existent pas.",
     }

@@ -108,7 +108,7 @@ if st.session_state.loaded:
             height=600,
             zoom=11,
         )
-        st.plotly_chart(fig, config = { "width" : "stretch",  "height" : 600} )
+        st.plotly_chart(fig, config={"width": "stretch", "height": 600})
 
     st.markdown("---")
 

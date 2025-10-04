@@ -4,7 +4,7 @@ elt:
     elt:
       type: duckdb
       path: data/duckdb/mobility_analysis.duckdb
-      threads: 2
+      threads: 4
       extensions:
         - httpfs
       settings:
