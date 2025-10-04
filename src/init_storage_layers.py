@@ -10,6 +10,7 @@ Fonctionnalités principales :
 import logging
 
 import duckdb
+from minio_utils import init_minio_bucket
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -40,7 +41,8 @@ def exec_sql_from_file(
 
 
 if __name__ == "__main__":
-    logger.info("Initialisation de la base de données.")
+    
+    logger.info("Initialisation de la base de données DuckDB.")
 
     table_definitions = {
         "create_consolidate_tables.sql": "Création des tables consolidées si elles n'existent pas.",
@@ -49,5 +51,5 @@ if __name__ == "__main__":
 
     for file_name, log_message in table_definitions.items():
         exec_sql_from_file(file_name, log_message)
-
-    logger.info("Base de données initialisée.")
+    logger.info("Initialisation de MinIO.")
+    init_minio_bucket()

@@ -27,7 +27,7 @@ EXPOSE 8501 8080
 ENTRYPOINT []
 
 CMD bash -c "\
-  python src/init_db.py && \
+  python src/init_storage_layers.py && \
   dbt docs generate --project-dir src/elt --profiles-dir src/elt && \
   (streamlit run src/ui.py --server.port 8501 --server.address 0.0.0.0 &) && \
   (dbt docs serve --project-dir src/elt --profiles-dir src/elt --port 8080 --host 0.0.0.0)"
