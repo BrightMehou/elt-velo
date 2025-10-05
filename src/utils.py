@@ -5,10 +5,12 @@ Fonctions réutilisables pour :
 - Exécution de fichiers SQL sur DuckDB
 - Initialisation de buckets MinIO
 - Envoi de fichiers JSON vers MinIO
+- Exécute les transformations ELT via `dbt run` dans le projet `src/elt`.
 """
 
 import logging
 import os
+import subprocess
 from datetime import datetime
 from io import BytesIO
 
@@ -41,9 +43,7 @@ def exec_sql_from_file(
     situé dans le répertoire `src/sql_statements`, et exécutées
     une par une sur la base de données `mobility_analysis.duckdb`.
     """
-    con: duckdb.DuckDBPyConnection = duckdb.connect(
-        database=DUCKDB_PATH, read_only=False
-    )
+    con = duckdb.connect(database=DUCKDB_PATH, read_only=False)
     sql_path: str = f"src/sql_statements/{file_name}"
 
     with open(sql_path) as fd:
@@ -79,9 +79,9 @@ def store_json(raw_json: str, file_name: str) -> None:
         file_name (str): Nom du fichier dans lequel les données seront sauvegardées.
     """
     # Conversion en octets  et création d'un "fichier" virtuel en mémoire à partir des octets
-    data_bytes: bytes = raw_json.encode("utf-8")
-    data_stream: BytesIO = BytesIO(data_bytes)
     object_key: str = f"{today_date}/{file_name}"
+    data_bytes: bytes = raw_json.encode("utf-8")
+    data_stream = BytesIO(data_bytes)
 
     minio_client.put_object(
         BUCKET_NAME,
@@ -92,3 +92,38 @@ def store_json(raw_json: str, file_name: str) -> None:
     )
 
     logger.info(f"Fichier envoyé dans MinIO : {BUCKET_NAME}/{object_key}")
+
+
+def data_transformation() -> None:
+    """
+    Exécute la commande `dbt run` pour lancer les transformations ELT.
+
+    Cette fonction lance le processus `dbt run` via `subprocess.run`
+    dans le répertoire du projet `src/elt`.
+    Les sorties standard et d’erreur sont capturées et loguées via `logger`.
+
+    Raises:
+        subprocess.CalledProcessError: si la commande `dbt run` échoue.
+    """
+    logger.info("🚀 Démarrage de la commande dbt run")
+
+    try:
+        result = subprocess.run(
+            [
+                "dbt",
+                "run",
+                "--project-dir",
+                "src/transformation",
+                "--profiles-dir",
+                "src/transformation",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        logger.info("✅ dbt run terminé avec succès")
+        logger.info(result.stdout)
+
+    except subprocess.CalledProcessError as e:
+        logger.error("❌ Erreur pendant le dbt run")
+        logger.error(e.stderr)

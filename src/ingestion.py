@@ -17,7 +17,7 @@ from utils import store_json
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger: logging.Logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 today_date: str = datetime.now().strftime("%Y-%m-%d")
 
 
@@ -26,16 +26,16 @@ def get_realtime_bicycle_data() -> None:
     Récupère les données en temps réel des vélos pour Paris, Nantes, Toulouse et Strasbourg.
     Si une ville échoue, crée un fichier JSON vide ([]) pour éviter un crash dbt.
     """
-    urls: dict[str, str] = {
+    URLS_CITY: dict[str, str] = {
         "paris": "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/velib-disponibilite-en-temps-reel/exports/json",
         "nantes": "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_stations-velos-libre-service-nantes-metropole-disponibilites/exports/json",
         "toulouse": "https://data.toulouse-metropole.fr/api/explore/v2.1/catalog/datasets/api-velo-toulouse-temps-reel/exports/json?lang=fr&timezone=Europe%2FParis",
         "strasbourg": "https://opendata.strasbourg.eu/api/explore/v2.1/catalog/datasets/stations-velhop/exports/json?lang=fr&timezone=Europe%2FBerlin",
     }
 
-    for city, url in urls.items():
+    for city, url in URLS_CITY.items():
         try:
-            response: requests.Response = requests.get(url, timeout=20)
+            response = requests.get(url, timeout=20)
             if response.status_code == 200 and response.text.strip():
                 store_json(response.text, f"{city}_realtime_bicycle_data.json")
                 logger.info(f"✅ Données {city} stockées avec succès")
@@ -51,9 +51,9 @@ def get_realtime_bicycle_data() -> None:
 
 def get_commune_data() -> None:
     """Récupère les données des communes françaises et les stocke dans MinIO avec fallback JSON vide."""
-    url: str = "https://geo.api.gouv.fr/communes"
+    URL_COMMUNES: str = "https://geo.api.gouv.fr/communes"
     try:
-        response: requests.Response = requests.get(url, timeout=30)
+        response = requests.get(URL_COMMUNES, timeout=30)
         if response.status_code == 200 and response.text.strip():
             store_json(response.text, "commune_data.json")
             logger.info("✅ Données communes stockées avec succès")

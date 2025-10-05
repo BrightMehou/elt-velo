@@ -1,7 +1,7 @@
-elt:                           
-  target: elt
+transformation:                           
+  target: transformation
   outputs:
-    elt:
+    transformation:
       type: duckdb
       path: data/duckdb/mobility_analysis.duckdb
       threads: 4

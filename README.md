@@ -21,10 +21,9 @@ Les données sont stockées dans MinIO (data lake), transformées à l’aide de
 ├── data/                      # Données utilisées par les processus
 │   └── duckdb/                # Base de données locale DuckDB
 ├── src/                       # Code source principal
-│   ├── elt/                   # Projet DBT pour la transformation des données
 │   ├── sql_statements/        # Requêtes SQL réutilisables
+│   ├── transformation/        # Projet DBT pour la transformation des données
 │   ├── data_ingestion.py      # Ingestion des données en temps réel
-│   ├── data_transformation.py # Transformation des données brutes
 │   ├── init_storage_layers.py # Fichier d'initialisation de la base de données
 │   ├── ui.py                  # Interface utilisateur
 │   └── utils.py               # Fonctions utilitaires

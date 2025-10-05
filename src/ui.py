@@ -16,9 +16,8 @@ import streamlit as st
 from pandas import DataFrame
 from plotly.graph_objects import Figure
 
-from data_ingestion import data_ingestion
-from data_transformation import data_transformation
-from utils import DUCKDB_PATH
+from ingestion import data_ingestion
+from utils import DUCKDB_PATH, data_transformation
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
