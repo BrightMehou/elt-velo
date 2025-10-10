@@ -49,3 +49,4 @@ vars:
   NANTES_CITY_CODE : 2
   TOULOUSE_CITY_CODE : 3
   STRASBOURG_CITY_CODE : 4
+  BUCKET_NAME: mobility-analysis

@@ -12,7 +12,7 @@ select
     current_date() as created_date,
     (json ->> 'capacity')::INTEGER as capacity
 from read_json_objects_auto(
-    's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/paris_realtime_bicycle_data.json'
+    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/paris_realtime_bicycle_data.json'
 )
 
 union all
@@ -31,7 +31,7 @@ select
     current_date() as created_date,
     (json ->> 'bike_stands')::INTEGER as capacity
 from read_json_objects_auto(
-    's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/nantes_realtime_bicycle_data.json'
+    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/nantes_realtime_bicycle_data.json'
 )
 
 union all
@@ -50,7 +50,7 @@ select
     current_date() as created_date,
     (json ->> 'bike_stands')::INTEGER as capacity
 from read_json_objects_auto(
-    's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/toulouse_realtime_bicycle_data.json'
+    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/toulouse_realtime_bicycle_data.json'
 )
 
 union all
@@ -69,5 +69,5 @@ select
     current_date() as created_date,
     (json ->> 'to')::INTEGER as capacity
 from read_json_objects_auto(
-    's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/strasbourg_realtime_bicycle_data.json'
+    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/strasbourg_realtime_bicycle_data.json'
 )

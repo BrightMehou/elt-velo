@@ -28,4 +28,5 @@ if __name__ == "__main__":
     for file_name, log_message in TABLE_DEFINITIONS.items():
         exec_sql_from_file(file_name, log_message)
     logger.info("Initialisation de MinIO.")
+
     init_minio_bucket()

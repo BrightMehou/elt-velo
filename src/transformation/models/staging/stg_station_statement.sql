@@ -6,7 +6,7 @@ select
     (json ->> 'duedate')::TIMESTAMP as last_statement_date,
     current_date() as created_date
 from read_json_objects_auto(
-    's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/paris_realtime_bicycle_data.json'
+    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/paris_realtime_bicycle_data.json'
 )
 
 union all
@@ -19,7 +19,7 @@ select
     (json ->> 'last_update')::TIMESTAMP as last_statement_date,
     current_date() as created_date
 from read_json_objects_auto(
-    's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/nantes_realtime_bicycle_data.json'
+    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/nantes_realtime_bicycle_data.json'
 )
 
 union all
@@ -32,7 +32,7 @@ select
     (json ->> 'last_update')::TIMESTAMP as last_statement_date,
     current_date() as created_date
 from read_json_objects_auto(
-    's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/toulouse_realtime_bicycle_data.json'
+    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/toulouse_realtime_bicycle_data.json'
 )
 
 union all
@@ -45,5 +45,5 @@ select
     to_timestamp((json ->> 'last_reported')::INT) as last_statement_date,
     current_date() as created_date
 from read_json_objects_auto(
-    's3://bicycle-data/{{ run_started_at.strftime("%Y-%m-%d") }}/strasbourg_realtime_bicycle_data.json'
+    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/strasbourg_realtime_bicycle_data.json'
 )

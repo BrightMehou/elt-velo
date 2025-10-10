@@ -23,7 +23,7 @@ logging.basicConfig(
 logger: logging.Logger = logging.getLogger(__name__)
 
 DUCKDB_PATH: str = "data/duckdb/mobility_analysis.duckdb"
-BUCKET_NAME: str = "bicycle-data"
+BUCKET_NAME: str = "mobility-analysis"
 
 MINIO_ENDPOINT: str = os.getenv("minio_endpoint", "localhost:9000")
 MINIO_ACCESS_KEY: str = os.getenv("minio_access_key", "minioadmin")
@@ -96,19 +96,14 @@ def store_json(raw_json: str, file_name: str) -> None:
 
 def data_transformation() -> None:
     """
-    Exécute la commande `dbt run` pour lancer les transformations ELT.
-
-    Cette fonction lance le processus `dbt run` via `subprocess.run`
-    dans le répertoire du projet `src/elt`.
-    Les sorties standard et d’erreur sont capturées et loguées via `logger`.
-
-    Raises:
-        subprocess.CalledProcessError: si la commande `dbt run` échoue.
+    Exécute la commande `dbt run` et affiche les logs en temps réel
+    directement dans le terminal (sans capture ni buffering).
     """
+
     logger.info("🚀 Démarrage de la commande dbt run")
 
     try:
-        result = subprocess.run(
+        subprocess.run(
             [
                 "dbt",
                 "run",
@@ -117,13 +112,9 @@ def data_transformation() -> None:
                 "--profiles-dir",
                 "src/transformation",
             ],
-            capture_output=True,
-            text=True,
             check=True,
         )
         logger.info("✅ dbt run terminé avec succès")
-        logger.info(result.stdout)
 
     except subprocess.CalledProcessError as e:
-        logger.error("❌ Erreur pendant le dbt run")
-        logger.error(e.stderr)
+        logger.error(f"❌ Erreur pendant le dbt run (code {e.returncode})")
