@@ -1,6 +1,13 @@
 version: 2
 
 models:
+
+  - name: stg_city
+    description: "Table de staging des villes avec leurs informations brutes."
+  - name: stg_station_statement
+    description: "Table de staging unifiant les relevés de disponibilité des stations des différentes villes."
+  - name: stg_station
+    description: "Table de staging unifiant les informations des stations des différentes villes."
   - name: consolidate_station
     description: "Table des stations de vélos avec leurs informations générales."
     columns:
@@ -133,3 +140,12 @@ models:
     tests:
       - unique:
           column_name: "(station_id || '-' || city_id || '-' || created_date)"
+
+  - name: available_emplacement_by_city
+    description: "Vue montrant le nombre total de places libres par ville"
+  - name: map_station
+    description: "Vue cartographique du statut des stations de vélos."
+  - name: mean_bicycle_available_by_station_city
+    description: "Vue affichant le nombre moyen de vélos disponibles par station."
+  - name: total_capacity_by_city
+    description: "Vue affichant la capacité totale de vélos par ville."
