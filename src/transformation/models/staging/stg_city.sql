@@ -1,7 +1,7 @@
 select
     code as id,
     lower(nom) as name,
-    population as nb_inhabitants,
+    population::integer as nb_inhabitants,
     current_date() as created_date
 from
     read_json(

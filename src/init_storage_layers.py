@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     TABLE_DEFINITIONS: dict[str, str] = {
         "create_consolidate_tables.sql": "Création des tables consolidées si elles n'existent pas.",
-        "create_agregate_tables.sql": "Création des tables d'agrégation si elles n'existent pas.",
+        "create_star_tables.sql": "Création des tables du modèle en étoile si elles n'existent pas.",
     }
 
     for file_name, log_message in TABLE_DEFINITIONS.items():

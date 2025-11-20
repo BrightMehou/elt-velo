@@ -36,12 +36,14 @@ models:
       +group: analytics
     consolidate:
       +materialized: incremental
+      +incremental_strategy: merge
       +group: consolidate
     staging:
       +materialized: ephemeral
       +group: staging
     star_model:
-      +materialized: table
+      +materialized: incremental
+      +incremental_strategy: merge
       +group: star_model
 
 vars:

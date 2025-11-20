@@ -1,11 +1,17 @@
+{{
+  config(
+    unique_key = 'station_id',
+  )
+}}
 with temp as ( select 
     station_id ,
     bicycle_docks_available ,
     bicycle_available,
     last_statement_date,
 from {{ ref('consolidate_station_statement') }}
+{% if is_incremental() %}
 where created_date = (select max(created_date) from {{ ref('consolidate_station_statement') }})
-
+{% endif %}
 )
 
 select
