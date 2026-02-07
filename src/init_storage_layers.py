@@ -17,12 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-
     logger.info("Initialisation de la base de données DuckDB.")
 
     TABLE_DEFINITIONS: dict[str, str] = {
-        "create_consolidate_tables.sql": "Création des tables consolidées si elles n'existent pas.",
-        "create_star_tables.sql": "Création des tables du modèle en étoile si elles n'existent pas.",
+        "create_consolidate_tables.sql": "Création des tables consolidées",
+        "create_star_tables.sql": "Création des tables du modèle en étoile",
     }
 
     for file_name, log_message in TABLE_DEFINITIONS.items():

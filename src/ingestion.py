@@ -2,9 +2,9 @@
 Script d'ingestion des données en temps réel pour l'analyse de mobilité.
 
 Fonctionnalités principales :
-- Récupération des données vélo en temps réel pour Paris, Nantes, Toulouse et Strasbourg.
+- Récupération des données vélo en temps réel des stations de vélo.
 - Récupération des données des communes françaises via l'API geo.gouv.fr.
-- Stockage des données dans MinIO, avec création de fichiers JSON vides en cas d'erreur ou d'indisponibilité.
+- Stockage des données dans MinIO, avec création de fichiers JSON vides en cas d'erreur.
 """
 
 import logging
@@ -34,7 +34,7 @@ URL_COMMUNES: str = "https://geo.api.gouv.fr/communes"
 
 def get_realtime_bicycle_data() -> None:
     """
-    Récupère les données en temps réel des vélos pour Paris, Nantes, Toulouse et Strasbourg.
+    Récupère les données en temps réel des stations de vélo.
     Si une ville échoue, crée un fichier JSON vide ([]) pour éviter un crash dbt.
     """
     for url in CityUrl:
@@ -47,7 +47,7 @@ def get_realtime_bicycle_data() -> None:
                 logger.info(f"✅ Données {url.name} stockées avec succès")
             else:
                 logger.warning(
-                    f"⚠️ {url.name} indisponible (status: {response.status_code}), création fichier vide."
+                    f"⚠️ {url.name} indisponible (status: {response.status_code})"
                 )
                 store_json("[]", f"{url.name.lower()}_realtime_bicycle_data.json")
         except Exception as e:
@@ -56,7 +56,7 @@ def get_realtime_bicycle_data() -> None:
 
 
 def get_commune_data() -> None:
-    """Récupère les données des communes françaises et les stocke dans MinIO avec fallback JSON vide."""
+    """Récupère les données des communes françaises et les stocke dans MinIO"""
     try:
         response = requests.get(URL_COMMUNES, timeout=30)
         if response.status_code == 200 and response.text.strip():
@@ -64,7 +64,7 @@ def get_commune_data() -> None:
             logger.info("✅ Données communes stockées avec succès")
         else:
             logger.warning(
-                f"⚠️ API communes indisponible (status: {response.status_code}), création fichier vide."
+                f"⚠️ API communes indisponible (status: {response.status_code})"
             )
             store_json("[]", "commune_data.json")
     except Exception as e:
@@ -74,7 +74,7 @@ def get_commune_data() -> None:
 
 def data_ingestion() -> None:
     """
-    Fonction principale pour ingérer les données en temps réel des vélos et des communes.
+    Ingérer les données en temps réel des vélos et des communes.
     """
     get_realtime_bicycle_data()
     get_commune_data()

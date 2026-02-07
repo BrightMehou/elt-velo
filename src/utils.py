@@ -75,10 +75,10 @@ def store_json(raw_json: str, file_name: str) -> None:
     Structure du chemin : YYYY-MM-DD/nom_fichier.json
 
     Args:
-        raw_json (str): Les données brutes en format JSON sous forme de chaîne.
-        file_name (str): Nom du fichier dans lequel les données seront sauvegardées.
+        raw_json (str): Les données brutes en format JSON
+        file_name (str): Fichier de sauvegarde des données
     """
-    # Conversion en octets  et création d'un "fichier" virtuel en mémoire à partir des octets
+    # Conversion en octets et convertion en "fichier virtuel en mémoire"
     object_key: str = f"{today_date}/{file_name}"
     data_bytes: bytes = raw_json.encode("utf-8")
     data_stream = BytesIO(data_bytes)

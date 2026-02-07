@@ -33,9 +33,6 @@ if "loaded" not in st.session_state:
 
 
 st.title("📊 Tableau de bord des stations de vélos 🚲")
-st.markdown(
-    "Cliquez sur **Alimenter et afficher** pour lancer le pipeline et visualiser les données."
-)
 
 if st.button("🔄 Alimenter et afficher"):
     try:
