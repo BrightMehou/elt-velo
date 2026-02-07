@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
@@ -19,7 +19,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Expose Streamlit (8501) et dbt docs (8080)
 EXPOSE 8501 8080
 COPY init_app.sh /init_app.sh
 
