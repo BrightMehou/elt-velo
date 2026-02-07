@@ -24,9 +24,9 @@ services:
       - "8501:8501"  
       - "8080:8080"   
     environment:
-      - minio_endpoint=minio:9000
-      - minio_access_key=minioadmin
-      - minio_secret_key=miniopassword
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=miniopassword
     depends_on:
       minio:
           condition: service_healthy

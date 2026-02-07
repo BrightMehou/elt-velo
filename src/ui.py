@@ -8,7 +8,7 @@ Fonctionnalités principales :
 """
 
 import logging
-from typing import Callable
+from collections.abc import Callable
 
 import duckdb
 import plotly.express as px

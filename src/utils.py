@@ -25,9 +25,9 @@ logger: logging.Logger = logging.getLogger(__name__)
 DUCKDB_PATH: str = "data/duckdb/mobility_analysis.duckdb"
 BUCKET_NAME: str = "mobility-analysis"
 
-MINIO_ENDPOINT: str = os.getenv("minio_endpoint", "localhost:9000")
-MINIO_ACCESS_KEY: str = os.getenv("minio_access_key", "minioadmin")
-MINIO_SECRET_KEY: str = os.getenv("minio_secret_key", "miniopassword")
+MINIO_ENDPOINT: str = os.getenv("MINIO_ENDPOINT", "localhost:9000")
+MINIO_ACCESS_KEY: str = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
+MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "miniopassword")
 
 today_date: str = datetime.now().strftime("%Y-%m-%d")
 
