@@ -1,43 +1,38 @@
-{{
-  config(
-    unique_key = ['id','created_date'],
-  )
-}}
-with city_codes_cte as (
-        select
-            id as insee_code,
-            name as city_name,
-            created_date
-        from
-            {{ ref('consolidate_city') }}
-        where
-            created_date = (
-                select
-                    max(created_date)
-                from
-                    {{ ref('consolidate_city') }}
-            )
-            and
-            name in ('nantes', 'strasbourg', 'toulouse')
-    )
-select
-   source.id,
-   source.code,
-   source.name,
-   source.city_name,
-   coalesce(source.city_code, c.insee_code) as city_code,
-   source.address,
-   source.longitude,
-   source.latitude,
-   source.status,
-   source.created_date,
-   source.capacity,
-from
-     {{ ref('stg_station') }} as source
-left join city_codes_cte c on source.city_name = c.city_name
-
-{% if is_incremental() %}
-
-where source.created_date >= (select coalesce(max(created_date),'1900-01-01') from {{ this }} )
-
-{% endif %}
+{{ config(unique_key = ['id','created_date'],) }} WITH city_codes_cte AS (
+    SELECT
+        id AS insee_code,
+        name AS city_name,
+        created_date
+    FROM
+        {{ ref('consolidate_city') }}
+    WHERE
+        created_date = (
+            SELECT
+                max(created_date)
+            FROM
+                {{ ref('consolidate_city') }}
+        )
+        AND name IN ('nantes', 'strasbourg', 'toulouse')
+)
+SELECT
+    source.id,
+    source.code,
+    source.name,
+    source.city_name,
+    source.address,
+    source.longitude,
+    source.latitude,
+    source.status,
+    source.created_date,
+    source.capacity,
+    coalesce(source.city_code, c.insee_code) AS city_code
+FROM
+    {{ ref('stg_station') }} AS source
+    LEFT JOIN city_codes_cte AS c ON source.city_name = c.city_name {% if is_incremental() %}
+WHERE
+    source.created_date >= (
+        SELECT
+            coalesce(max(created_date), '1900-01-01')
+        FROM
+            {{ this }}
+    ) {% endif %}

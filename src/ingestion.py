@@ -41,18 +41,16 @@ def get_realtime_bicycle_data() -> None:
         try:
             response = requests.get(url, timeout=20)
             if response.status_code == 200 and response.text.strip():
-                store_json(
-                    response.text, f"{url.name.lower()}_realtime_bicycle_data.json"
-                )
+                store_json(f"{url.name.lower()}_realtime_bicycle_data.json", response.text)
                 logger.info(f"✅ Données {url.name} stockées avec succès")
             else:
                 logger.warning(
                     f"⚠️ {url.name} indisponible (status: {response.status_code})"
                 )
-                store_json("[]", f"{url.name.lower()}_realtime_bicycle_data.json")
+                store_json(f"{url.name.lower()}_realtime_bicycle_data.json", "[]")
         except Exception as e:
             logger.error(f"❌ Erreur pour {url.name}: {e}. Création fichier vide.")
-            store_json("[]", f"{url.name.lower()}_realtime_bicycle_data.json")
+            store_json(f"{url.name.lower()}_realtime_bicycle_data.json", "[]")
 
 
 def get_commune_data() -> None:
@@ -60,16 +58,16 @@ def get_commune_data() -> None:
     try:
         response = requests.get(URL_COMMUNES, timeout=30)
         if response.status_code == 200 and response.text.strip():
-            store_json(response.text, "commune_data.json")
+            store_json("commune_data.json", response.text)
             logger.info("✅ Données communes stockées avec succès")
         else:
             logger.warning(
                 f"⚠️ API communes indisponible (status: {response.status_code})"
             )
-            store_json("[]", "commune_data.json")
+            store_json("commune_data.json", "[]")
     except Exception as e:
         logger.error(f"❌ Erreur récupération communes : {e}")
-        store_json("[]", "commune_data.json")
+        store_json("commune_data.json", "[]")
 
 
 def data_ingestion() -> None:

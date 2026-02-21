@@ -1,9 +1,11 @@
-select
-    code as id,
-    lower(nom) as name,
-    population::integer as nb_inhabitants,
-    current_date() as created_date
-from
-    read_json(
-        's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/commune_data.json'
-    )
+SELECT
+    (ROW ->> 'population') :: integer AS NB_INHABITANTS,
+    ROW ->> 'code' AS ID,
+    lower(ROW ->> 'nom') AS NAME,
+    current_date AS CREATED_DATE
+FROM
+    STAGING_RAW,
+    jsonb_array_elements(DATA) AS ROW
+WHERE
+    NOM = 'commune_data.json'
+    AND DATE = current_date

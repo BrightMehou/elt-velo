@@ -1,4 +1,4 @@
-select 
+SELECT
     ds.id,
     ds.code,
     ds.name,
@@ -10,9 +10,9 @@ select
     fss.bicycle_docks_available,
     fss.bicycle_available,
     fss.last_statement_date
-from {{ ref('dim_station') }} ds
-join {{ ref('fact_station_statement') }} fss 
-    on ds.id = fss.station_id
-where 
-    ds.latitude is not null
-    and ds.longitude is not null
+FROM
+    {{ ref('dim_station') }} AS ds
+    INNER JOIN {{ ref('fact_station_statement') }} AS fss ON ds.id = fss.station_id
+WHERE
+    ds.latitude IS NOT NULL
+    AND ds.longitude IS NOT NULL

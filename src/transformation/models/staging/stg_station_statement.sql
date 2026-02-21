@@ -1,49 +1,55 @@
 -- Paris
-select
-    '{{ var("PARIS_CITY_CODE", "1") }}' || '-' || (json ->> 'stationcode') as id,
-    (json ->> 'numdocksavailable')::INTEGER as bicycle_docks_available,
-    (json ->> 'numbikesavailable')::INTEGER as bicycle_available,
-    (json ->> 'duedate')::TIMESTAMP as last_statement_date,
-    current_date() as created_date
-from read_json_objects_auto(
-    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/paris_realtime_bicycle_data.json'
-)
-
-union all
-
--- Nantes
-select
-    '{{ var("NANTES_CITY_CODE", "2") }}' || '-' || (json ->> 'number') as id,
-    (json ->> 'available_bike_stands')::INTEGER as bicycle_docks_available,
-    (json ->> 'available_bikes')::INTEGER as bicycle_available,
-    (json ->> 'last_update')::TIMESTAMP as last_statement_date,
-    current_date() as created_date
-from read_json_objects_auto(
-    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/nantes_realtime_bicycle_data.json'
-)
-
-union all
-
--- Toulouse
-select
-    '{{ var("TOULOUSE_CITY_CODE", "3") }}' || '-' || (json ->> 'number') as id,
-    (json ->> 'available_bike_stands')::INTEGER as bicycle_docks_available,
-    (json ->> 'available_bikes')::INTEGER as bicycle_available,
-    (json ->> 'last_update')::TIMESTAMP as last_statement_date,
-    current_date() as created_date
-from read_json_objects_auto(
-    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/toulouse_realtime_bicycle_data.json'
-)
-
-union all
-
--- Strasbourg
-select
-    '{{ var("STRASBOURG_CITY_CODE", "4") }}' || '-' || (json ->> 'id') as id,
-    (json ->> 'num_docks_available')::INTEGER as bicycle_docks_available,
-    (json ->> 'av')::INTEGER as bicycle_available,
-    to_timestamp((json ->> 'last_reported')::INT) as last_statement_date,
-    current_date() as created_date
-from read_json_objects_auto(
-    's3://{{ var("BUCKET_NAME") }}/{{ run_started_at.strftime("%Y-%m-%d") }}/strasbourg_realtime_bicycle_data.json'
-)
+SELECT
+    '{{ var("PARIS_CITY_CODE", "1") }}' || '-' || (json ->> 'stationcode') AS id,
+    (json ->> 'numdocksavailable') :: INTEGER AS bicycle_docks_available,
+    (json ->> 'numbikesavailable') :: INTEGER AS bicycle_available,
+    (json ->> 'duedate') :: TIMESTAMP AS last_statement_date,
+    current_date AS created_date
+FROM
+    staging_raw,
+    jsonb_array_elements(data) AS json
+WHERE
+    nom = 'paris_realtime_bicycle_data.json'
+    AND date = current_date
+UNION
+ALL -- Nantes
+SELECT
+    '{{ var("NANTES_CITY_CODE", "2") }}' || '-' || (json ->> 'number') AS id,
+    (json ->> 'available_bike_stands') :: INTEGER AS bicycle_docks_available,
+    (json ->> 'available_bikes') :: INTEGER AS bicycle_available,
+    (json ->> 'last_update') :: TIMESTAMP AS last_statement_date,
+    current_date AS created_date
+FROM
+    staging_raw,
+    jsonb_array_elements(data) AS json
+WHERE
+    nom = 'nantes_realtime_bicycle_data.json'
+    AND date = current_date
+UNION
+ALL -- Toulouse
+SELECT
+    '{{ var("TOULOUSE_CITY_CODE", "3") }}' || '-' || (json ->> 'number') AS id,
+    (json ->> 'available_bike_stands') :: INTEGER AS bicycle_docks_available,
+    (json ->> 'available_bikes') :: INTEGER AS bicycle_available,
+    (json ->> 'last_update') :: TIMESTAMP AS last_statement_date,
+    current_date AS created_date
+FROM
+    staging_raw,
+    jsonb_array_elements(data) AS json
+WHERE
+    nom = 'toulouse_realtime_bicycle_data.json'
+    AND date = current_date
+UNION
+ALL -- Strasbourg
+SELECT
+    '{{ var("STRASBOURG_CITY_CODE", "4") }}' || '-' || (json ->> 'id') AS id,
+    (json ->> 'num_docks_available') :: INTEGER AS bicycle_docks_available,
+    (json ->> 'av') :: INTEGER AS bicycle_available,
+    to_timestamp((json ->> 'last_reported') :: INT) AS last_statement_date,
+    current_date AS created_date
+FROM
+    staging_raw,
+    jsonb_array_elements(data) AS json
+WHERE
+    nom = 'strasbourg_realtime_bicycle_data.json'
+    AND date = current_date

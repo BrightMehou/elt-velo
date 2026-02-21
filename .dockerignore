@@ -41,3 +41,6 @@ logs/
 
 **/*.duckdb
 **/*.duckdb.wal
+
+**/.github
+**/.ruff_cache

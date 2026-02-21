@@ -1,18 +1,19 @@
-{{
-  config(
-    unique_key = 'id',
-  )
-}}
-select
-    id,
-    code,
-    name,
-    address,
-    longitude,
-    latitude,
-    status,
-    capacity,
-from {{ ref('consolidate_station') }}
-{% if is_incremental() %}
-where created_date = (select max(created_date) from {{ ref('consolidate_station') }})
-{% endif %}
+{{ config(unique_key = 'id',) }}
+SELECT
+  id,
+  code,
+  name,
+  address,
+  longitude,
+  latitude,
+  STATUS,
+  capacity
+FROM
+  {{ ref('consolidate_station') }} {% if is_incremental() %}
+WHERE
+  created_date = (
+    SELECT
+      max(created_date)
+    FROM
+      {{ ref('consolidate_station') }}
+  ) {% endif %}

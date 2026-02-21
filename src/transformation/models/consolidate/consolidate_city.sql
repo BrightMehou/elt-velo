@@ -1,18 +1,15 @@
-{{
-  config(
-    unique_key = ['id', 'created_date'],
-  )
-}}
-select
-   id,
-   name,
-   nb_inhabitants,
-   created_date::date as created_date
-from
-     {{ ref('stg_city') }}
-
-{% if is_incremental() %}
-
-where created_date >= (select coalesce(max(created_date),'1900-01-01') from {{ this }} )
-
-{% endif %}
+{{ config(unique_key = ['id', 'created_date'],) }}
+SELECT
+  id,
+  NAME,
+  nb_inhabitants,
+  created_date :: DATE AS created_date
+FROM
+  {{ ref('stg_city') }} {% if is_incremental() %}
+WHERE
+  created_date >= (
+    SELECT
+      COALESCE(MAX(created_date), '1900-01-01')
+    FROM
+      {{ this }}
+  ) {% endif %}

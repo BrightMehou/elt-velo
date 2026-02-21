@@ -12,88 +12,74 @@ import logging
 import os
 import subprocess
 from datetime import datetime
-from io import BytesIO
 
-import duckdb
-from minio import Minio
+import psycopg2
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger: logging.Logger = logging.getLogger(__name__)
 
-DUCKDB_PATH: str = "data/duckdb/mobility_analysis.duckdb"
-BUCKET_NAME: str = "mobility-analysis"
-
-MINIO_ENDPOINT: str = os.getenv("MINIO_ENDPOINT", "localhost:9000")
-MINIO_ACCESS_KEY: str = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "miniopassword")
 
 today_date: str = datetime.now().strftime("%Y-%m-%d")
 
+DB_NAME: str = os.getenv("DB_NAME", "postgres")
+DB_USER: str = os.getenv("DB_USER", "postgres")
+DB_PASSWORD: str = os.getenv("DB_PASSWORD", "postgres") 
+DB_HOST: str = os.getenv("DB_HOST", "localhost")
+DB_PORT: str = os.getenv("DB_PORT", "5432")
 
 def exec_sql_from_file(
     file_name: str,
     log_message: str,
 ) -> None:
     """
-    Crée les tables définies dans un fichier SQL.
-
-    Les instructions SQL sont lues depuis le fichier spécifié,
-    situé dans le répertoire `src/sql_statements`, et exécutées
-    une par une sur la base de données `mobility_analysis.duckdb`.
-    """
-    con = duckdb.connect(database=DUCKDB_PATH, read_only=False)
-    sql_path: str = f"src/sql_statements/{file_name}"
-
-    with open(sql_path) as fd:
-        statements: str = fd.read()
-
-        for statement in statements.split(";"):
-            con.execute(statement)
-        logger.info(log_message)
-
-
-minio_client: Minio = Minio(
-    endpoint=MINIO_ENDPOINT,
-    access_key=MINIO_ACCESS_KEY,
-    secret_key=MINIO_SECRET_KEY,
-    secure=False,
-)
-
-
-def init_minio_bucket() -> None:
-    """Crée un bucket dans MinIO s'il n'existe pas."""
-    if not minio_client.bucket_exists(BUCKET_NAME):
-        minio_client.make_bucket(BUCKET_NAME)
-        logger.info(f"Bucket '{BUCKET_NAME}' créé.")
-
-
-def store_json(raw_json: str, file_name: str) -> None:
-    """
-    Envoie les données JSON dans un bucket MinIO.
-    Structure du chemin : YYYY-MM-DD/nom_fichier.json
+    Exécute les instructions SQL d'un fichier sur une base de données PostgreSQL.
 
     Args:
-        raw_json (str): Les données brutes en format JSON
-        file_name (str): Fichier de sauvegarde des données
+        file_name (str): Le nom du fichier SQL situé dans `src/sql_statements`.
+        log_message (str): Message à afficher dans les logs après l'exécution.
     """
-    # Conversion en octets et convertion en "fichier virtuel en mémoire"
-    object_key: str = f"{today_date}/{file_name}"
-    data_bytes: bytes = raw_json.encode("utf-8")
-    data_stream = BytesIO(data_bytes)
-
-    minio_client.put_object(
-        BUCKET_NAME,
-        object_key,
-        data_stream,
-        length=len(data_bytes),
-        content_type="application/json",
+    sql_path: str = f"src/sql_statements/{file_name}"
+    conn = psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
     )
 
-    logger.info(f"Fichier envoyé dans MinIO : {BUCKET_NAME}/{object_key}")
+    with open(sql_path) as fd:
+        query: str = fd.read()
 
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            conn.commit()
+            logger.info(log_message)
+  
 
+def store_json(name: str, raw_json: str) -> None:
+    """
+    Envoie les données JSON dans la table staging_raw de PostgreSQL.
+
+    Args:
+        name (str): Le nom du fichier source
+        raw_json (str): Les données brutes en format JSON
+    """
+    conn = psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+
+    with conn.cursor() as cursor:
+        insert_query = f"INSERT INTO staging_raw (nom, date, data) VALUES (%s, %s, %s) ON CONFLICT (nom, date) DO UPDATE SET data = EXCLUDED.data"
+        cursor.execute(insert_query, (name, today_date, raw_json))
+        conn.commit()
+        logger.info(f"Données JSON insérées dans la table staging_raw de PostgreSQL.")
+      
 def data_transformation() -> None:
     """
     Exécute la commande `dbt run` et affiche les logs en temps réel

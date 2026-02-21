@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-python src/init_storage_layers.py
+python src/init_db.py
 
 dbt docs generate --project-dir src/transformation --profiles-dir src/transformation
 
