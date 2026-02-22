@@ -6,7 +6,7 @@ SELECT
     (json ->> 'duedate') :: TIMESTAMP AS last_statement_date,
     current_date AS created_date
 FROM
-    staging_raw,
+    {{ source('postgres', 'staging_raw') }},
     jsonb_array_elements(data) AS json
 WHERE
     nom = 'paris_realtime_bicycle_data.json'
@@ -20,7 +20,7 @@ SELECT
     (json ->> 'last_update') :: TIMESTAMP AS last_statement_date,
     current_date AS created_date
 FROM
-    staging_raw,
+    {{ source('postgres', 'staging_raw') }},
     jsonb_array_elements(data) AS json
 WHERE
     nom = 'nantes_realtime_bicycle_data.json'
@@ -34,7 +34,7 @@ SELECT
     (json ->> 'last_update') :: TIMESTAMP AS last_statement_date,
     current_date AS created_date
 FROM
-    staging_raw,
+    {{ source('postgres', 'staging_raw') }},
     jsonb_array_elements(data) AS json
 WHERE
     nom = 'toulouse_realtime_bicycle_data.json'
@@ -48,7 +48,7 @@ SELECT
     to_timestamp((json ->> 'last_reported') :: INT) AS last_statement_date,
     current_date AS created_date
 FROM
-    staging_raw,
+    {{ source('postgres', 'staging_raw') }},
     jsonb_array_elements(data) AS json
 WHERE
     nom = 'strasbourg_realtime_bicycle_data.json'

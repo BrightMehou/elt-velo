@@ -12,7 +12,7 @@ SELECT
     current_date AS created_date,
     (json ->> 'capacity') :: INTEGER AS capacity
 FROM
-    staging_raw,
+    {{ source('postgres', 'staging_raw') }},
     jsonb_array_elements(data) AS json
 WHERE
     nom = 'paris_realtime_bicycle_data.json'
@@ -32,7 +32,7 @@ SELECT
     current_date AS created_date,
     (json ->> 'bike_stands') :: INTEGER AS capacity
 FROM
-    staging_raw,
+    {{ source('postgres', 'staging_raw') }},
     jsonb_array_elements(data) AS json
 WHERE
     nom = 'nantes_realtime_bicycle_data.json'
@@ -52,7 +52,7 @@ SELECT
     current_date AS created_date,
     (json ->> 'bike_stands') :: INTEGER AS capacity
 FROM
-    staging_raw,
+    {{ source('postgres', 'staging_raw') }},
     jsonb_array_elements(data) AS json
 WHERE
     nom = 'toulouse_realtime_bicycle_data.json'
@@ -72,7 +72,7 @@ SELECT
     current_date AS created_date,
     (json ->> 'to') :: INTEGER AS capacity
 FROM
-    staging_raw,
+    {{ source('postgres', 'staging_raw') }},
     jsonb_array_elements(data) AS json
 WHERE
     nom = 'strasbourg_realtime_bicycle_data.json'

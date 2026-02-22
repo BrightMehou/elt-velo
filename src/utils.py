@@ -93,9 +93,9 @@ def data_transformation() -> bool:
     cli_args =  [
                     "run",
                     "--project-dir",
-                    "src/transformation",
+                    "dbt-transformation",
                     "--profiles-dir",
-                    "src/transformation",
+                    "dbt-transformation",
                 ]
     res: dbtRunnerResult = dbt.invoke(cli_args)
     return res.success

@@ -4,7 +4,7 @@ SELECT
     lower(ROW ->> 'nom') AS NAME,
     current_date AS CREATED_DATE
 FROM
-    STAGING_RAW,
+    {{ source('postgres', 'staging_raw') }},
     jsonb_array_elements(DATA) AS ROW
 WHERE
     NOM = 'commune_data.json'

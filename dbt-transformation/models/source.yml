@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: postgres
+    database: postgres
+    schema: public
+    tables:
+      - name: staging_raw
+        description: "Table de staging des données brutes extraites"
