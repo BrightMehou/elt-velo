@@ -2,18 +2,17 @@
 Module d'utilitaires pour DuckDB et MinIO.
 
 Fonctions réutilisables pour :
-- Exécution de fichiers SQL sur DuckDB
-- Initialisation de buckets MinIO
-- Envoi de fichiers JSON vers MinIO
-- Exécute les transformations ELT via `dbt run` dans le projet `src/elt`.
+- Exécution de fichiers SQL sur PostgreSQL
+- Envoi de fichiers JSON vers PostgreSQL
+- Exécute les transformations ELT via `dbt run` dans le projet `src/transformation`.
 """
 
 import logging
 import os
-import subprocess
 from datetime import datetime
 
 import psycopg2
+from dbt.cli.main import dbtRunner, dbtRunnerResult
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -75,32 +74,29 @@ def store_json(name: str, raw_json: str) -> None:
     )
 
     with conn.cursor() as cursor:
-        insert_query = f"INSERT INTO staging_raw (nom, date, data) VALUES (%s, %s, %s) ON CONFLICT (nom, date) DO UPDATE SET data = EXCLUDED.data"
+        insert_query = """
+                       INSERT INTO staging_raw (nom, date, data) VALUES (%s, %s, %s) 
+                       ON CONFLICT (nom, date) DO UPDATE SET data = EXCLUDED.data
+                    """
         cursor.execute(insert_query, (name, today_date, raw_json))
         conn.commit()
-        logger.info(f"Données JSON insérées dans la table staging_raw de PostgreSQL.")
+        logger.info("Données JSON insérées dans la table staging_raw de PostgreSQL.")
       
-def data_transformation() -> None:
+def data_transformation() -> bool:
     """
-    Exécute la commande `dbt run` et affiche les logs en temps réel
-    directement dans le terminal (sans capture ni buffering).
+    Exécute la commande `dbt run`.
     """
 
     logger.info("🚀 Démarrage de la commande dbt run")
 
-    try:
-        subprocess.run(
-            [
-                "dbt",
-                "run",
-                "--project-dir",
-                "src/transformation",
-                "--profiles-dir",
-                "src/transformation",
-            ],
-            check=True,
-        )
-        logger.info("✅ dbt run terminé avec succès")
+    dbt = dbtRunner()
+    cli_args =  [
+                    "run",
+                    "--project-dir",
+                    "src/transformation",
+                    "--profiles-dir",
+                    "src/transformation",
+                ]
+    res: dbtRunnerResult = dbt.invoke(cli_args)
+    return res.success
 
-    except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Erreur pendant le dbt run (code {e.returncode})")

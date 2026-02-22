@@ -2,8 +2,7 @@
 Script d'initialisation des couches de stockage pour l'analyse de mobilité.
 
 Fonctionnalités principales :
-- Création des tables consolidées et d'agrégation dans DuckDB.
-- Initialisation du bucket MinIO pour le stockage des données.
+- Création des tables de staging, consolidées et d'agrégation dans PostgreSQL.
 """
 
 import logging

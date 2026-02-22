@@ -6,15 +6,15 @@ Fonctionnalités principales :
 - Carte interactive des stations avec Plotly.
 - Indicateurs clés par ville et par station.
 """
-import os
 import logging
+import os
 from collections.abc import Callable
 
-from sqlalchemy import create_engine, text
+import pandas as pd
 import plotly.express as px
 import streamlit as st
-import pandas as pd
 from plotly.graph_objects import Figure
+from sqlalchemy import create_engine, text
 
 from ingestion import data_ingestion
 from utils import data_transformation
@@ -22,21 +22,24 @@ from utils import data_transformation
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
-logger: logging.Logger = logging.getLogger(__name__)
+
+logger = logging.getLogger(__name__)
 logger.info("Démarrage de l'application Streamlit.")
 
-DB_NAME: str = os.getenv("DB_NAME", "postgres")
-DB_USER: str = os.getenv("DB_USER", "postgres")
-DB_PASSWORD: str = os.getenv("DB_PASSWORD", "postgres") 
-DB_HOST: str = os.getenv("DB_HOST", "localhost")
-DB_PORT: str = os.getenv("DB_PORT", "5432")
-DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+st.set_page_config(page_title="Tableau de bord mobilité", page_icon="🚲", layout="wide")
+st.logo("🚲")
 
-engine = create_engine(DB_URL)
+@st.cache_resource
+def get_sql_engine() -> create_engine:
+    DB_NAME: str = os.getenv("DB_NAME", "postgres")
+    DB_USER: str = os.getenv("DB_USER", "postgres")
+    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "postgres") 
+    DB_HOST: str = os.getenv("DB_HOST", "localhost")
+    DB_PORT: str = os.getenv("DB_PORT", "5432")
+    DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    return create_engine(DB_URL)
 
-st.set_page_config(page_title="Tableau de bord mobilité 🚲", layout="wide")
-
-
+engine = get_sql_engine()
 if "loaded" not in st.session_state:
     st.session_state.loaded = False
 

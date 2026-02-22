@@ -4,7 +4,7 @@ Script d'ingestion des données en temps réel pour l'analyse de mobilité.
 Fonctionnalités principales :
 - Récupération des données vélo en temps réel des stations de vélo.
 - Récupération des données des communes françaises via l'API geo.gouv.fr.
-- Stockage des données dans MinIO, avec création de fichiers JSON vides en cas d'erreur.
+- Stockage des données dans PostgreSQL via je format JSONB.
 """
 
 import logging
@@ -40,21 +40,22 @@ def get_realtime_bicycle_data() -> None:
     for url in CityUrl:
         try:
             response = requests.get(url, timeout=20)
+            url_name = url.name.lower()
             if response.status_code == 200 and response.text.strip():
-                store_json(f"{url.name.lower()}_realtime_bicycle_data.json", response.text)
+                store_json(f"{url_name}_realtime_bicycle_data.json", response.text)
                 logger.info(f"✅ Données {url.name} stockées avec succès")
             else:
                 logger.warning(
                     f"⚠️ {url.name} indisponible (status: {response.status_code})"
                 )
-                store_json(f"{url.name.lower()}_realtime_bicycle_data.json", "[]")
+                store_json(f"{url_name}_realtime_bicycle_data.json", "[]")
         except Exception as e:
             logger.error(f"❌ Erreur pour {url.name}: {e}. Création fichier vide.")
-            store_json(f"{url.name.lower()}_realtime_bicycle_data.json", "[]")
+            store_json(f"{url_name}_realtime_bicycle_data.json", "[]")
 
 
 def get_commune_data() -> None:
-    """Récupère les données des communes françaises et les stocke dans MinIO"""
+    """Récupère les données des communes françaises et les stocke dans PostgreSQL."""
     try:
         response = requests.get(URL_COMMUNES, timeout=30)
         if response.status_code == 200 and response.text.strip():

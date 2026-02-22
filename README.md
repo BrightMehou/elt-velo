@@ -1,7 +1,7 @@
 ## 🚴 ETL-Velo
 
-Ce projet propose la mise en place d’un pipeline simple pour collecter, transformer et analyser les données des systèmes de vélos en libre-service de Paris, Nantes, Toulouse et Strasbourg.
-Les données sont stockées dans MinIO (data lake), transformées à l’aide de DBT (Data Build Tool) pour assurer la qualité, la modularité et la traçabilité des modèles de données, puis consolidées dans DuckDB (data warehouse). Enfin, elles sont présentées via Streamlit pour faciliter l’exploration et la visualisation des résultats.
+Ce projet propose la mise en place d’un pipeline pour collecter, transformer et analyser les données des systèmes de vélos en libre-service de Paris, Nantes, Toulouse et Strasbourg.
+Les données sont stockées dans Postgres, transformées à l’aide de DBT (Data Build Tool) pour assurer la qualité, la modularité et la traçabilité des modèles de données. Enfin, elles sont présentées via Streamlit pour faciliter l’exploration et la visualisation des résultats.
 
 ---
 
@@ -18,13 +18,11 @@ Les données sont stockées dans MinIO (data lake), transformées à l’aide de
 ## 🗂️ **Structure du Projet**
 
 ```plaintext
-├── data/                      # Données utilisées par les processus
-│   └── duckdb/                # Base de données locale DuckDB
 ├── src/                       # Code source principal
 │   ├── sql_statements/        # Requêtes SQL réutilisables
 │   ├── transformation/        # Projet DBT pour la transformation des données
-│   ├── data_ingestion.py      # Ingestion des données en temps réel
-│   ├── init_storage_layers.py # Fichier d'initialisation de la base de données
+│   ├── ingestion.py           # Ingestion des données en temps réel
+│   ├── init_db.py             # Fichier d'initialisation de la base de données
 │   ├── ui.py                  # Interface utilisateur
 │   └── utils.py               # Fonctions utilitaires
 ├── docker-compose.yml         # Orchestration des services 
@@ -42,24 +40,24 @@ Les données sont stockées dans MinIO (data lake), transformées à l’aide de
 ### **1. Ingestion des données**
 **Objectif** : Récupérer des données brutes depuis des sources externes.
 #### Étapes : 
-Dans le fichier Python `data_ingestion.py`
+Dans le fichier Python `ingestion.py`
 - **`get_realtime_bicycle_data`** : 
   - Récupère les données en temps réel sur les vélos disponibles des villes (Paris, Nantes, Toulouse, Strasbourg).
 - **`get_commune_data`** : 
   - Récupère des données sur les communes.
 
 #### Produits :
-- Les données brutes sont enregistrées dans les fichiers JSON dans le bucket dédié.
+- Les données brutes sont enregistrées dans les fichiers JSON dans la table de staging dédiée.
 
 
 ### **2. Transformation des données avec DBT**  
-**Objectif** : Organiser, nettoyer et structurer les données brutes issues du data lake pour les rendre exploitables.
+**Objectif** : Organiser, nettoyer et structurer les données brutes issues des API pour les rendre exploitables.
 
 #### Étapes :  
 La transformation des données est orchestrée via **DBT**, selon une architecture modulaire :
 
 - 📁 **Staging**  
-  - Création de tables temporaires à partir des fichiers bruts stockés dans **MinIO**.  
+  - Création de tables temporaires à partir des fichiers bruts stockés dans la table staging_raw.  
   - Ces modèles permettent de normaliser les formats et de préparer les données pour les étapes suivantes.
 
 - 📁 **Consolidate**  
@@ -67,7 +65,7 @@ La transformation des données est orchestrée via **DBT**, selon une architectu
   - Les données des communes et des stations sont nettoyées, enrichies et structurées pour l’analyse.
 
 #### Produits :  
-- Les tables consolidées sont stockées dans **DuckDB** et servent de base aux modèles analytiques et aux vues agrégées.
+- Les tables consolidées sont alimentées et servent de base aux modèles analytiques et aux vues agrégées.
 
 ---
 
@@ -86,28 +84,20 @@ La modélisation suit une logique en étoile et se décompose en deux niveaux :
   - Ces vues permettent d’explorer les métriques clés et les tendances du système de vélos en libre-service.
 
 #### Produits :  
-- Les vues finales sont stockées dans **DuckDB** et intégrées à l’interface Streamlit pour la visualisation interactive.
+- Les vues finales créées et intégrées à l’interface Streamlit pour la visualisation interactive.
 
 ---
 
 ## 🚀 **Installation et Exécution**
 
-1. **Cloner le dépôt :**  
-   ```bash
-   git clone https://github.com/BrightMehou/elt-velo.git
-   cd elt-velo
-   ```
 
-2. **Installer Docker** : 
-   Si Docker n'est pas encore installé : [Docker installation](https://www.docker.com/)
-
-3. **Construire les images Docker et lancer les containeurs :**  
+1. **Construire les images Docker et lancer les containeurs :**  
    ```bash
    docker-compose up -d
    ```
-
-4. **Accéder à l'interface streamlit :**  
+   
+2. **Accéder à l'interface streamlit :**  
    Rendez-vous sur [http://localhost:8501](http://localhost:8501) 
 
-5. **Accéder à la documentation DBT :**  
+3. **Accéder à la documentation DBT :**  
    Rendez-vous sur [http://localhost:8080](http://localhost:8080) 
