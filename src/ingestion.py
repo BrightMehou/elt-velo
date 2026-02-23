@@ -15,9 +15,6 @@ import requests
 
 from utils import store_json
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 logger = logging.getLogger(__name__)
 today_date: str = datetime.now().strftime("%Y-%m-%d")
 

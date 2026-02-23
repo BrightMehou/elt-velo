@@ -14,11 +14,8 @@ from datetime import datetime
 import psycopg2
 from dbt.cli.main import dbtRunner, dbtRunnerResult
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger: logging.Logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 today_date: str = datetime.now().strftime("%Y-%m-%d")
 
@@ -28,6 +25,13 @@ DB_PASSWORD: str = os.getenv("DB_PASSWORD", "postgres")
 DB_HOST: str = os.getenv("DB_HOST", "localhost")
 DB_PORT: str = os.getenv("DB_PORT", "5432")
 
+conn = psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
 def exec_sql_from_file(
     file_name: str,
     log_message: str,
@@ -40,13 +44,6 @@ def exec_sql_from_file(
         log_message (str): Message à afficher dans les logs après l'exécution.
     """
     sql_path: str = f"src/sql_statements/{file_name}"
-    conn = psycopg2.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
 
     with open(sql_path) as fd:
         query: str = fd.read()
@@ -65,13 +62,6 @@ def store_json(name: str, raw_json: str) -> None:
         name (str): Le nom du fichier source
         raw_json (str): Les données brutes en format JSON
     """
-    conn = psycopg2.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
 
     with conn.cursor() as cursor:
         insert_query = """

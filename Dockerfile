@@ -22,4 +22,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8501 8080
 COPY init_app.sh /init_app.sh
 
-ENTRYPOINT ["/bin/bash", "/init_app.sh"]
+ENTRYPOINT ["/init_app.sh"]

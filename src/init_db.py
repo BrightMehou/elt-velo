@@ -10,7 +10,7 @@ import logging
 from utils import exec_sql_from_file
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", force=True
 )
 logger = logging.getLogger(__name__)
 

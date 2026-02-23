@@ -20,9 +20,8 @@ CREATE TABLE IF NOT EXISTS fact_station_statement (
     city_id varchar NOT NULL,
     bicycle_docks_available integer,
     bicycle_available integer,
-    last_statement_date datetime,
+    last_statement_date timestamp,
     created_date date DEFAULT current_date,
-    PRIMARY KEY (station_id, city_id, created_date),
-    -- foreign key (station_id) references dim_station (id),
+    PRIMARY KEY (station_id, city_id, created_date) -- foreign key (station_id) references dim_station (id),
     -- foreign key (city_id) references dim_city (id)
 );

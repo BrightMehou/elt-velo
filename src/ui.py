@@ -20,7 +20,7 @@ from ingestion import data_ingestion
 from utils import data_transformation
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", force=True
 )
 
 logger = logging.getLogger(__name__)
@@ -81,6 +81,7 @@ if st.session_state.loaded:
         df_map: pd.DataFrame = pd.read_sql_query(text(query_map), con)
         if df_map.empty:
             st.warning("Aucune donnée pour la carte.")
+            logger.warning("DataFrame pour la carte est vide.") 
         else:
             fig: Figure = px.scatter_map(
                 df_map,
@@ -105,7 +106,7 @@ if st.session_state.loaded:
                 zoom=11,
             )
             st.plotly_chart(fig, config={"width": "stretch", "height": 600})
-
+            logger.info("Données pour la carte chargées.")
         st.markdown("---")
 
         st.subheader("📈 Indicateurs clés")
@@ -126,6 +127,7 @@ if st.session_state.loaded:
             st.markdown(f"**{title}**")
             df = pd.read_sql_query(text(query), con)
             st.dataframe(df, width="stretch")
+            logger.info(f"Données pour '{title}' chargées.")
 
     st.caption("Données issues des API publiques des stations de vélos.")
 else:
