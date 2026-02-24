@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     TABLE_DEFINITIONS: dict[str, str] = {
         "create_staging_tables.sql": "Création des tables de staging",
-#       "create_consolidate_tables.sql": "Création des tables consolidées",
-#       "create_star_tables.sql": "Création des tables du modèle en étoile",
+        "create_consolidate_tables.sql": "Création des tables consolidées",
+        "create_star_tables.sql": "Création des tables du modèle en étoile",
     }
 
     for file_name, log_message in TABLE_DEFINITIONS.items():

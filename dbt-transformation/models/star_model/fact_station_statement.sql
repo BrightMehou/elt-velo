@@ -3,7 +3,8 @@
         station_id,
         bicycle_docks_available,
         bicycle_available,
-        last_statement_date
+        last_statement_date,
+        created_date
     FROM
         {{ ref('consolidate_station_statement') }} {% if is_incremental() %}
     WHERE
@@ -19,7 +20,8 @@ SELECT
     city.id AS city_id,
     temp.bicycle_docks_available,
     temp.bicycle_available,
-    temp.last_statement_date
+    temp.last_statement_date,
+    temp.created_date
 FROM
     temp
     INNER JOIN {{ ref('consolidate_station') }} AS station ON temp.station_id = station.id
